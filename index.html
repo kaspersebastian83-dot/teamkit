@@ -75,7 +75,7 @@ svg.i{width:18px;height:18px;flex:none}
 .i-s{width:14px!important;height:14px!important}
 .i-m{width:16px!important;height:16px!important;color:var(--sp-muted)}
 /* Versalien-Etikett: Grundbaustein des Looks */
-.cap,.ue h3,.ue h2,.gruppe,.sp-knopf,.sp-haupt,.los,.zurueck,.sk,.wahl,.akt,.pille,.marke-neu,.marke-wichtig,.marke{text-transform:uppercase;letter-spacing:.06em}
+.cap,.ue h3,.ue h2,.gruppe,.sp-knopf,.sp-haupt,.los,.zurueck,.wahl,.akt,.marke-neu,.marke-wichtig,.marke{text-transform:uppercase;letter-spacing:.06em}
 /* Knöpfe */
 .sp-knopf{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border:1px solid var(--sp-text);background:var(--sp-panel);font-size:12.5px;font-weight:600;transition:background .15s,color .15s,border-color .15s}
 .sp-knopf:hover{background:var(--sp-text);color:#fff;border-color:var(--sp-text)}
@@ -99,7 +99,7 @@ details.mehr .menue button{height:44px;border:0;background:none;text-align:left;
 details.mehr .menue button:hover{background:var(--sp-panel2)}
 /* Seite */
 main{max-width:1320px;margin:0 auto;padding:var(--abstand) 24px 56px;display:flex;flex-direction:column;gap:var(--abstand)}
-@media (max-width:600px){main{padding:16px 16px 40px}.kopf{padding:6px 8px 6px 16px;flex-wrap:nowrap;gap:4px}.kopf .sp-knopf{padding:0 12px;font-size:11.5px;white-space:nowrap}.status-ich b{flex-basis:calc(100% - 50px)}.status-ich .sk{flex:1 1 calc(50% - 4px)}}
+@media (max-width:600px){main{padding:16px 16px 40px}.kopf{padding:6px 8px 6px 16px;flex-wrap:nowrap;gap:4px}.kopf .sp-knopf{padding:0 12px;font-size:11.5px;white-space:nowrap}}
 .ansicht{display:flex;flex-direction:column;gap:var(--abstand)}
 .meldung{padding:12px 16px;font-size:14px;display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;background:var(--sp-panel);border:1px solid var(--sp-line);border-left:3px solid #b07a3c;margin-bottom:8px}
 .meldung>span{flex:1 1 240px}
@@ -118,23 +118,6 @@ main{max-width:1320px;margin:0 auto;padding:var(--abstand) 24px 56px;display:fle
 .ohne{margin:0}
 /* Bilder / Kürzel – klein, eckig */
 .ava{border-radius:0;flex:none;object-fit:cover;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;letter-spacing:.02em;background:#d6d3ce}
-/* Status */
-.status-ich{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.status-ich b{font-size:13px;font-weight:600;margin-right:4px}
-.sk{height:44px;padding:0 18px;border:1px solid var(--sp-line2);background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
-.sk:hover{border-color:var(--sp-text)}
-.sk[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
-.leute{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));border-top:1px solid var(--sp-line);border-left:1px solid var(--sp-line)}
-.person{display:flex;align-items:center;gap:10px;background:#fff;border-right:1px solid var(--sp-line);border-bottom:1px solid var(--sp-line);padding:10px 12px;font-size:14px;font-weight:500;min-width:0}
-.person .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.person.leer{color:var(--sp-muted);padding:10px 12px}
-.person.leer .ava{opacity:.55}
-.pille{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--sp-muted);white-space:nowrap}
-.pille::before{content:"";width:8px;height:8px;background:var(--sp-line2);flex:none}
-.p-Büro{color:var(--sp-text)}.p-Büro::before{background:#2f6b52}
-.p-Homeoffice{color:var(--sp-text)}.p-Homeoffice::before{background:var(--navy)}
-.p-Ortstermin{color:var(--sp-text)}.p-Ortstermin::before{background:#a8693a}
-.p-Frei{color:var(--sp-text)}.p-Frei::before{background:#9c9c96}
 /* Raster */
 .zwei{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:var(--abstand);align-items:start}
 .zwei.gleich{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -248,7 +231,6 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
   <!-- Guten Morgen: einmal am Tag -->
   <section id="morgen" class="ansicht" hidden>
     <div class="gruss"><div><div class="cap" id="mDatum"></div><h1 id="mGruss"></h1></div><span class="frei"></span><button class="tx" type="button" data-aktion="los">Heute nicht mehr zeigen</button></div>
-    <section class="karte" id="mStatus"></section>
     <div class="zwei gleich">
       <section class="spalte"><div class="ue"><h3>Heute &amp; morgen</h3><span>verschwindet von selbst</span></div><div id="mBald" class="spalte"></div></section>
       <section class="spalte"><div class="ue"><h3>Neu für dich</h3><span id="mNeuZahl"></span></div><div id="mNeu" class="spalte"></div></section>
@@ -259,7 +241,6 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
 
   <!-- Team: alles -->
   <section id="team" class="ansicht" hidden>
-    <section class="karte" id="tStatus"></section>
     <div class="zwei">
       <section class="spalte">
         <form class="composer" id="kurzForm" novalidate>
@@ -302,7 +283,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
 
   <section id="ueber" class="karte" hidden>
     <h2 class="titel-l">TeamKit <span id="version" class="klein"></span></h2>
-    <p style="margin:0">Wer ist heute wo, was ist heute und morgen los, und was gilt im Büro. Alles liegt im Ordner <code>_TeamKit</code> im Archivordner – je Beitrag eine kleine Datei. TeamKit liest sonst nur die Mitarbeiterliste und fasst keine Projektordner an. Nichts verlässt das Büro.</p>
+    <p class="ohne">Was ist heute und morgen los, und was gilt im Büro. Alles liegt im Ordner <code>_TeamKit</code> im Archivordner – je Beitrag eine kleine Datei. TeamKit liest sonst nur die Mitarbeiterliste und fasst keine Projektordner an. Nichts verlässt das Büro.</p>
     <p style="margin:0">Fotos: <code>_TeamKit\Fotos\&lt;Kürzel&gt;.jpg</code> (Kürzel wie am Ende der Projektordner, z. B. <code>Nad.jpg</code>). Wer kein Foto hat, erscheint mit seinem Kürzel.</p>
     <ul id="aenderungen" class="klein" style="margin:0;padding-left:18px"></ul>
     <div class="zeile"><button class="sp-knopf" type="button" data-aktion="zu-team">Zurück</button></div>
@@ -312,22 +293,21 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
 
 <script>
 'use strict';
-/* TeamKit – Guten Morgen, Status, Heute & morgen, Gilt jetzt.
+/* TeamKit – Guten Morgen, Heute & morgen, Gilt jetzt.
    Schreibt ausschließlich nach <Archivordner>/_TeamKit (je Person und Beitrag eine eigene Datei, nie dieselbe Datei für zwei Leute):
      k-<JJJJMMTT>-<zufall>.json        kurzer Beitrag (Notiz oder Umfrage) mit Ablauf „bis“
      g-<JJJJMMTT>-<zufall>.json        „Gilt jetzt“-Beitrag, bleibt bis „erledigt“
      r-<Beitrags-ID>~<Kürzel>.json     Reaktion einer Person (Umfrage, Danke, Antworten)
-     s~<Kürzel>.json                   Status heute (wird jeden Tag überschrieben – kein Verlauf)
    Liest: Fotos/<Kürzel>.jpg|png und <Archivordner>/_Spektron-Mitarbeiter.json. Löscht nie Dateien. */
-const APP_VERSION = '0.3.0';
+const APP_VERSION = '0.3.1';
 const AENDERUNGEN = [
+  ['0.3.1', '17.11.2026', 'Bereich „Heute im Büro“ entfernt.'],
   ['0.3.0', '17.11.2026', 'Neues Aussehen: ruhig und redaktionell – eckige Karten mit Haarlinien, Schrift Inter (liegt in der App, kein Netz nötig), Überschriften in Versalien, dunkles Navy für Knöpfe, Status als Raster mit farbigem Merker.'],
   ['0.2.0', '17.11.2026', 'Neu aufgebaut nach Claudes Entwurf: Guten-Morgen-Seite einmal am Tag, Status „Heute im Büro“ (ohne Verlauf), „Heute & morgen“ nach Tagen mit automatischer Dauer aus dem Text („morgen“, „Freitag“, „20.11.“), „Gilt jetzt“ bis erledigt mit Archiv, Fotos aus _TeamKit\\Fotos, „Zurück zum Projekt“ beim Öffnen aus der Projektzentrale.'],
   ['0.1.0', '17.11.2026', 'Erste Fassung mit zwei Reitern (ersetzt).'],
 ];
 const TK_ORDNER = '_TeamKit', FOTO_ORDNER = 'Fotos', MA_FILE = '_Spektron-Mitarbeiter.json', ICH_KEY = 'spektron-ich';
 const KURZ_MAX_TAGE = 7, KURZ_DATUM_MAX = 60, MAX_BYTES = 30000;   // gewählte Dauer höchstens 1 Woche; ein Datum im Text („18.12.“) bis 60 Tage
-const STATUS = ['Büro', 'Homeoffice', 'Ortstermin', 'Frei'];
 const PARAM = new URLSearchParams(location.search);
 const EIN = PARAM.has('eingebettet');
 const $ = id => document.getElementById(id);
@@ -345,7 +325,7 @@ const SUITE = {
 };
 const S = {
   archiv: null, tk: null, schreiben: false, probe: false,
-  personen: [], kurz: [], gilt: [], reakt: new Map(), status: new Map(), fotos: new Map(), cache: new Map(),
+  personen: [], kurz: [], gilt: [], reakt: new Map(), fotos: new Map(), cache: new Map(),
   ansicht: 'zugang', offen: new Set(), giltBearbeite: null, giltZeigen: false, antwortOffen: '', frage: '', meldungen: [],
   giltGesehenAnzeige: '', stand: '',
 };
@@ -545,7 +525,7 @@ async function ordnerAnlegen() {
 
 /* ---------- Lesen ---------- */
 const K_RE = /^k-(\d{8})-([a-z0-9]{6,12})\.json$/, G_RE = /^g-(\d{8})-([a-z0-9]{6,12})\.json$/;
-const R_RE = /^r-([kg]-\d{8}-[a-z0-9]{6,12})~(.{1,24})\.json$/, S_RE = /^s~(.{1,24})\.json$/;
+const R_RE = /^r-([kg]-\d{8}-[a-z0-9]{6,12})~(.{1,24})\.json$/;
 const von = o => (o && typeof o.name === 'string' && o.name.trim()) ? { kuerzel: String(o.kuerzel || '').slice(0, 24), name: o.name.slice(0, 60) } : null;
 const isoOk = s => typeof s === 'string' && !isNaN(new Date(s));
 function pruefeKurz(o, id) {
@@ -573,7 +553,7 @@ async function lies(name, h) {
 let ladeNr = 0;
 async function laden() {
   if (!S.tk) return false;
-  const nr = ++ladeNr, ab = tagStr(plusTage(heute0(), -(KURZ_DATUM_MAX + 2))), kurz = [], gilt = [], reakt = new Map(), status = new Map(), rd = [];
+  const nr = ++ladeNr, ab = tagStr(plusTage(heute0(), -(KURZ_DATUM_MAX + 2))), kurz = [], gilt = [], reakt = new Map(), rd = [];
   try {
     for await (const [name, h] of S.tk.entries()) {
       if (h.kind !== 'file') continue;
@@ -581,15 +561,14 @@ async function laden() {
       if ((m = K_RE.exec(name))) { if (m[1] >= ab) { const e = pruefeKurz(await lies(name, h), `k-${m[1]}-${m[2]}`); if (e && !e.weg) kurz.push(e); } }
       else if ((m = G_RE.exec(name))) { const e = pruefeGilt(await lies(name, h), `g-${m[1]}-${m[2]}`); if (e && !e.weg) gilt.push(e); }
       else if ((m = R_RE.exec(name))) { if (m[1].startsWith('g-') || m[1].slice(2, 10) >= ab) rd.push([name, h, m[1]]); }
-      else if ((m = S_RE.exec(name))) { const o = await lies(name, h); if (o && o.format === 'teamkit-status' && o.tag === isoTag(new Date()) && STATUS.includes(o.status) && von(o.von)) status.set(von(o.von).kuerzel, { status: o.status, von: von(o.von) }); }
     }
     const ids = new Set([...kurz, ...gilt].map(e => e.id));
     for (const [name, h, id] of rd) { if (!ids.has(id)) continue; const r = pruefeReaktion(await lies(name, h), id); if (r) { if (!reakt.has(id)) reakt.set(id, []); reakt.get(id).push(r); } }
   } catch (e) { meldung('err', `<span>Der Ordner <code>_TeamKit</code> ließ sich gerade nicht lesen (${esc(e.message || e.name)}).</span><button class="sp-knopf" type="button" data-aktion="neuladen">Noch einmal</button>`, 'lesen'); return false; }
   if (nr !== ladeNr) return false;
   meldung('', '', 'lesen');
-  const neu = JSON.stringify([kurz, gilt, [...reakt], [...status]]), geaendert = neu !== S.stand;
-  S.stand = neu; S.kurz = kurz; S.gilt = gilt; S.reakt = reakt; S.status = status;
+  const neu = JSON.stringify([kurz, gilt, [...reakt]]), geaendert = neu !== S.stand;
+  S.stand = neu; S.kurz = kurz; S.gilt = gilt; S.reakt = reakt;
   melden(); return geaendert;
 }
 const kurzAktiv = () => S.kurz.filter(e => new Date(e.bis) >= new Date());
@@ -634,30 +613,12 @@ async function reaktion(id, aendern) {
   try { await schreibe(`r-${id}~${sicher(p.kuerzel)}.json`, o); } catch (e) { toast('Nicht gespeichert: ' + (e.message || e.name)); return; }
   await laden(); render();
 }
-async function statusSetzen(wert) {
-  const p = ichOderFrage(); if (!p || !darf()) return;
-  const alt = S.status.get(p.kuerzel), neu = alt && alt.status === wert ? '' : wert;
-  const o = { format: 'teamkit-status', version: 1, von: p, tag: neu ? isoTag(new Date()) : '', status: neu, am: new Date().toISOString() };
-  try { await schreibe(`s~${sicher(p.kuerzel)}.json`, o); } catch (e) { toast('Nicht gespeichert: ' + (e.message || e.name)); return; }
-  await laden(); render();
-}
 
 /* ---------- Anzeige ---------- */
 function render() {
   if (S.ansicht === 'morgen') renderMorgen();
   else if (S.ansicht === 'team') renderTeam();
   else if (S.ansicht === 'archiv') renderArchiv();
-}
-function statusHtml() {
-  const p = ich(), mein = p && S.status.get(p.kuerzel);
-  const knoepfe = STATUS.map(s => `<button class="sk" type="button" data-aktion="status" data-wert="${s}" aria-pressed="${!!mein && mein.status === s}">${s}</button>`).join('');
-  let leute = S.personen.filter(x => x.aktiv !== false && (!p || x.ordnerKuerzel !== p.kuerzel)).map(x => ({ v: { kuerzel: x.ordnerKuerzel, name: x.name }, s: (S.status.get(x.ordnerKuerzel) || {}).status || '' }));
-  if (!S.personen.length) leute = [...S.status.values()].filter(x => !istIch(x.von)).map(x => ({ v: x.von, s: x.status }));
-  leute.sort((a, b) => (!!b.s - !!a.s));
-  const pill = s => `<span class="pille ${s ? 'p-' + s : ''}">${s || 'nicht gesetzt'}</span>`;
-  return `<div class="ue"><h3>Heute im Büro</h3><span>freiwillig · gilt nur heute · kein Verlauf</span></div>
-    <div class="status-ich">${p ? ava(p, 32) : ''}<b>${p ? 'Du heute:' : 'Heute:'}</b>${knoepfe}</div>
-    ${leute.length ? `<div class="leute">${leute.map(x => `<div class="person${x.s ? '' : ' leer'}">${ava(x.v, 30)}<span class="name">${esc(vorname(x.v.name))}</span>${pill(x.s)}</div>`).join('')}</div>` : ''}`;
 }
 function namenListe(l) { return l.map(x => istIch(x.von) ? 'du' : esc(vorname(x.von.name))).join(', '); }
 function antwortenHtml(e, r) {
@@ -708,7 +669,6 @@ function renderMorgen() {
   const p = ich(), h = new Date().getHours();
   $('mDatum').textContent = `${WOCHENTAGE[new Date().getDay()]}, ${new Date().toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`;
   $('mGruss').textContent = (h < 11 ? 'Guten Morgen' : h < 18 ? 'Hallo' : 'Guten Abend') + (p ? ', ' + vorname(p.name) : '');
-  $('mStatus').innerHTML = statusHtml();
   const bald = kurzBald().sort((a, b) => a.bis.localeCompare(b.bis) || b.am.localeCompare(a.am));
   $('mBald').innerHTML = bald.length ? bald.slice(0, 5).map(kurzHtml).join('') + (bald.length > 5 ? `<button class="tx" type="button" data-aktion="zu-team">und ${bald.length - 5} weitere</button>` : '') : '<div class="leer">Heute und morgen steht nichts an.</div>';
   const neu = giltNeu().sort((a, b) => (b.wichtig - a.wichtig) || b.am.localeCompare(a.am));
@@ -718,7 +678,6 @@ function renderMorgen() {
   const f = document.querySelector('#morgen form[data-antwort] input'); if (f) f.focus();
 }
 function renderTeam() {
-  $('tStatus').innerHTML = statusHtml();
   const p = ich(); $('kAva').innerHTML = p ? ava(p, 34) : ''; $('kText').placeholder = 'Was gibt’s Neues' + (p ? ', ' + vorname(p.name) : '') + '?';
   dauerHinweis();
   const gruppen = new Map();
@@ -794,8 +753,7 @@ $('aSuche').addEventListener('input', renderArchiv);
 document.addEventListener('click', async ev => {
   const k = ev.target.closest('[data-aktion]'); if (!k) return;
   const a = k.dataset.aktion, id = k.dataset.id, e = id ? [...S.kurz, ...S.gilt].find(x => x.id === id) : null;
-  if (a === 'status') statusSetzen(k.dataset.wert);
-  else if (a === 'los') verlasseMorgen();
+  if (a === 'los') verlasseMorgen();
   else if (a === 'zu-team') { if (S.ansicht === 'morgen') { lokal.set('teamkit-morgen', isoTag(new Date())); } zuTeam(); }
   else if (a === 'auf') { if (S.offen.has(id)) S.offen.delete(id); else S.offen.add(id); render(); }
   else if (a === 'danke' && e) reaktion(id, o => { o.danke = !o.danke; });
