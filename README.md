@@ -1,6 +1,6 @@
 # TeamKit
 
-Wer ist heute wo, was ist heute und morgen los, und was gilt im Büro – Teil der Spektron-Suite. Eine einzelne HTML-Datei, ohne Server, ohne fremde Skripte.
+Wer ist heute wo, was ist heute und morgen los, und was gilt im Büro – Teil der Spektron-Suite. Eine einzelne HTML-Datei, ohne Server, ohne fremde Skripte. Schrift: Inter (`fonts/`, SIL Open Font License) liegt im Repo und wird offline mitgespeichert – kein Abruf aus dem Netz.
 
 - **Guten Morgen** (einmal am Tag, nur wenn etwas los oder neu ist): Status „Heute im Büro“, „Heute & morgen“, höchstens drei neue „Gilt jetzt“-Beiträge, Knopf „Los geht’s“.
 - **Heute im Büro:** Büro / Homeoffice / Ortstermin / Frei. Freiwillig, gilt nur heute, kein Verlauf (eine Datei je Person, jeden Tag überschrieben).

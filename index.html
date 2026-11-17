@@ -8,7 +8,8 @@
 <title>TeamKit · Spektron</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#17222c">
+<meta name="theme-color" content="#1c2a44">
+<link rel="preload" href="fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* ===== SPEKTRON-LOOK v1 – gemeinsames Aussehen der Spektron-Apps (byte-gleich in jeder App; Prüfung: tests/leiste.cjs) =====
    Nur Tokens (--sp-*) und allgemeine Bausteine, keine App-Farbe: jede App setzt --sp-app / --sp-app-dunkel AUSSERHALB dieses
@@ -53,110 +54,165 @@ body{font-family:var(--sp-font);background:var(--sp-bg);color:var(--sp-text)}
 /* ===== Ende SPEKTRON-LOOK v1 ===== */
 </style>
 <style>
-:root{ --sp-app:#5a6fc4; --sp-app-dunkel:#4558a6; --neu:#9a5527; --gelb:#fff7dc; --gelb-rand:#e4c96a; }
+/* ===== TeamKit-Look 0.3 – redaktionell: eckig, Haarlinien, Inter, Versalien-Überschriften, Navy. Überschreibt nur Tokens aus SPEKTRON-LOOK v1. ===== */
+@font-face{font-family:"Inter";src:url("fonts/inter-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+:root{
+  --sp-bg:#eeeeec; --sp-panel:#fff; --sp-panel2:#f6f6f4; --sp-line:#e2e2df; --sp-line2:#c8c8c3; --sp-text:#111214; --sp-muted:#62646a;
+  --sp-app:#2c3e60; --sp-app-dunkel:#1c2a44; --sp-err:#b3261e; --sp-ok:#2f6b52;
+  --sp-font:"Inter","Helvetica Neue",Helvetica,"Segoe UI",Arial,sans-serif; --sp-radius:0; --sp-radius-k:0; --sp-schatten:none;
+  --navy:#1c2a44; --navy-hell:#2c3e60; --beige:#efe9e2; --beige-rand:#d8cdc0; --ink2:#2b2d31;
+  --abstand:24px;
+}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-size:15px;line-height:1.45}
+body{font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss03"}
 [hidden]{display:none!important}
 button,input,textarea,select{font:inherit;color:inherit}
-a{color:var(--sp-app-dunkel)}
-button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--sp-text);outline-offset:2px}
+a{color:var(--sp-text);text-underline-offset:3px}
+code{font-size:.9em;background:var(--sp-panel2);padding:1px 4px}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--sp-text);outline-offset:2px}
 svg.i{width:18px;height:18px;flex:none}
-.sp-knopf{display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.kopf{position:sticky;top:0;z-index:5;background:var(--sp-panel);border-bottom:1px solid var(--sp-line);display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:6px 14px}
-.marke{font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}
-.marke img{width:24px;height:24px}
-.zurueck{height:44px;padding:0 16px 0 10px;border:0;border-radius:var(--sp-radius-k);background:var(--sp-app-dunkel);color:#fff;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer}
-.zurueck:hover{background:var(--sp-app)}
+.i-s{width:14px!important;height:14px!important}
+.i-m{width:16px!important;height:16px!important;color:var(--sp-muted)}
+/* Versalien-Etikett: Grundbaustein des Looks */
+.cap,.ue h3,.ue h2,.gruppe,.sp-knopf,.sp-haupt,.los,.zurueck,.sk,.wahl,.akt,.pille,.marke-neu,.marke-wichtig,.marke{text-transform:uppercase;letter-spacing:.06em}
+/* Knöpfe */
+.sp-knopf{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border:1px solid var(--sp-text);background:var(--sp-panel);font-size:12.5px;font-weight:600;transition:background .15s,color .15s,border-color .15s}
+.sp-knopf:hover{background:var(--sp-text);color:#fff;border-color:var(--sp-text)}
+.sp-knopf-app{background:var(--navy);border-color:var(--navy);color:#fff}
+.sp-knopf-app:hover{background:var(--navy-hell);border-color:var(--navy-hell)}
+.sp-knopf.k{height:40px}
+/* Kopf */
+.kopf{position:sticky;top:0;z-index:5;background:var(--sp-panel);border-bottom:1px solid var(--sp-line);display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:8px 24px;min-height:60px}
+.marke{font-weight:700;font-size:14px;letter-spacing:.14em;display:flex;align-items:center;gap:10px}
+.marke img{width:22px;height:22px}
+.zurueck{height:44px;padding:0 18px 0 12px;border:0;background:var(--navy);color:#fff;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer}
+.zurueck:hover{background:var(--navy-hell)}
 .frei{flex:1}
-.icon{width:44px;height:44px;border:0;background:none;border-radius:var(--sp-radius-k);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sp-text)}
+.icon{width:44px;height:44px;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sp-text)}
 .icon:hover{background:var(--sp-panel2)}
 details.mehr{position:relative}
 details.mehr summary{list-style:none}
 details.mehr summary::-webkit-details-marker{display:none}
-details.mehr .menue{position:absolute;right:0;top:46px;background:var(--sp-panel);border:1px solid var(--sp-line2);border-radius:var(--sp-radius-k);box-shadow:0 8px 24px rgba(0,0,0,.14);padding:6px;display:flex;flex-direction:column;min-width:240px;z-index:6}
-details.mehr .menue button{height:44px;border:0;background:none;text-align:left;padding:0 10px;border-radius:8px;cursor:pointer}
+details.mehr .menue{position:absolute;right:0;top:48px;background:var(--sp-panel);border:1px solid var(--sp-text);padding:6px 0;display:flex;flex-direction:column;min-width:260px;z-index:6}
+details.mehr .menue button{height:44px;border:0;background:none;text-align:left;padding:0 18px;cursor:pointer;font-size:14px}
 details.mehr .menue button:hover{background:var(--sp-panel2)}
-main{max-width:1280px;margin:0 auto;padding:16px 18px 40px;display:flex;flex-direction:column;gap:16px}
-.meldung{border-radius:var(--sp-radius-k);padding:10px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fdf0e6;border:1px solid #e3b58f}
+/* Seite */
+main{max-width:1320px;margin:0 auto;padding:var(--abstand) 24px 56px;display:flex;flex-direction:column;gap:var(--abstand)}
+@media (max-width:600px){main{padding:16px 16px 40px}.kopf{padding:6px 8px 6px 16px;flex-wrap:nowrap;gap:4px}.kopf .sp-knopf{padding:0 12px;font-size:11.5px;white-space:nowrap}.status-ich b{flex-basis:calc(100% - 50px)}.status-ich .sk{flex:1 1 calc(50% - 4px)}}
+.ansicht{display:flex;flex-direction:column;gap:var(--abstand)}
+.meldung{padding:12px 16px;font-size:14px;display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;background:var(--sp-panel);border:1px solid var(--sp-line);border-left:3px solid #b07a3c;margin-bottom:8px}
 .meldung>span{flex:1 1 240px}
-.meldung.err{background:#fbe9e7;border-color:#e0a59e}
-.meldung.info{background:#eef3f8;border-color:var(--sp-line2)}
-.meldung select,.meldung input{height:40px;border:1.5px solid var(--sp-line2);border-radius:8px;padding:0 8px;background:#fff}
-.karte{background:var(--sp-panel);border:1px solid var(--sp-line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.meldung.err{border-left-color:var(--sp-err)}
+.meldung.info{border-left-color:var(--navy)}
+.meldung select,.meldung input{height:44px;border:1px solid var(--sp-line2);padding:0 10px;background:#fff;border-radius:0}
+.karte{background:var(--sp-panel);border:1px solid var(--sp-line);padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+@media (max-width:600px){.karte{padding:18px 16px}}
 .karte h1,.karte h2{margin:0}
-.ue{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.ue h3{margin:0;font-size:13px;font-weight:700;letter-spacing:.07em;color:#3b4558;text-transform:uppercase}
-.ue span{font-size:12px;color:var(--sp-muted)}
-.klein{font-size:12.5px;color:var(--sp-muted)}
-/* Bilder / Kürzel */
-.ava{border-radius:50%;flex:none;object-fit:cover;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;background:#d9deea}
+.titel-l{font-size:22px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.titel-m{font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:0}
+.ue{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--sp-text)}
+.ue h3,.ue h2{margin:0;font-size:13px;font-weight:600;color:var(--sp-text)}
+.ue span{font-size:12.5px;color:var(--sp-muted)}
+.klein{font-size:13px;color:var(--sp-muted)}
+.ohne{margin:0}
+/* Bilder / Kürzel – klein, eckig */
+.ava{border-radius:0;flex:none;object-fit:cover;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;letter-spacing:.02em;background:#d6d3ce}
 /* Status */
 .status-ich{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.status-ich b{font-size:13px}
-.sk{height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--sp-line2);background:#fff;font-size:13px;font-weight:600;cursor:pointer}
-.sk[aria-pressed="true"]{border-color:transparent;color:#fff}
-.sk[aria-pressed="true"][data-wert="Büro"]{background:#1f5c50}.sk[aria-pressed="true"][data-wert="Homeoffice"]{background:#3a4c96}
-.sk[aria-pressed="true"][data-wert="Ortstermin"]{background:#8a4a1c}.sk[aria-pressed="true"][data-wert="Frei"]{background:#4a5466}
-.leute{display:flex;gap:8px;flex-wrap:wrap}
-.person{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--sp-line);border-radius:999px;padding:4px 12px 4px 4px;font-size:13px;font-weight:600}
-.person.leer{opacity:.6}
-.pille{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:#f3f5f9;color:#5a6474}
-.p-Büro{background:#e4f1ee;color:#1f5c50}.p-Homeoffice{background:#e9edf9;color:#3a4c96}.p-Ortstermin{background:#fbeadb;color:#8a4a1c}.p-Frei{background:#eef0f3;color:#4a5466}
+.status-ich b{font-size:13px;font-weight:600;margin-right:4px}
+.sk{height:44px;padding:0 18px;border:1px solid var(--sp-line2);background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.sk:hover{border-color:var(--sp-text)}
+.sk[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.leute{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));border-top:1px solid var(--sp-line);border-left:1px solid var(--sp-line)}
+.person{display:flex;align-items:center;gap:10px;background:#fff;border-right:1px solid var(--sp-line);border-bottom:1px solid var(--sp-line);padding:10px 12px;font-size:14px;font-weight:500;min-width:0}
+.person .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.person.leer{color:var(--sp-muted);padding:10px 12px}
+.person.leer .ava{opacity:.55}
+.pille{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--sp-muted);white-space:nowrap}
+.pille::before{content:"";width:8px;height:8px;background:var(--sp-line2);flex:none}
+.p-Büro{color:var(--sp-text)}.p-Büro::before{background:#2f6b52}
+.p-Homeoffice{color:var(--sp-text)}.p-Homeoffice::before{background:var(--navy)}
+.p-Ortstermin{color:var(--sp-text)}.p-Ortstermin::before{background:#a8693a}
+.p-Frei{color:var(--sp-text)}.p-Frei::before{background:#9c9c96}
 /* Raster */
-.zwei{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:start}
+.zwei{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:var(--abstand);align-items:start}
 .zwei.gleich{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 @media (max-width:900px){.zwei,.zwei.gleich{grid-template-columns:minmax(0,1fr)}}
-.spalte{display:flex;flex-direction:column;gap:10px;min-width:0}
-.spalte.gilt{background:#eef1f7;border-radius:16px;padding:14px}
+.spalte{display:flex;flex-direction:column;gap:12px;min-width:0}
+.spalte.eng{gap:8px}
+.spalte.gilt{background:var(--sp-panel);border:1px solid var(--sp-line);padding:22px 24px}
+@media (max-width:600px){.spalte.gilt{padding:18px 16px}}
 /* Beiträge */
-.post{background:#fff;border:1px solid var(--sp-line);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
-.post.wichtig{background:var(--gelb);border-color:var(--gelb-rand)}
-.post .rumpf{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
-.post .text{font-size:14.5px;font-weight:600;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere}
-.post .titel{font-size:15px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
-.post .lang{font-size:13.5px;line-height:1.45;color:#3b4558;white-space:pre-wrap;overflow-wrap:anywhere}
-.meta{font-size:12px;color:var(--sp-muted)}
+.post{background:#fff;border:1px solid var(--sp-line);padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
+.post.wichtig{background:var(--beige);border-color:var(--beige-rand)}
+.post .rumpf{display:flex;flex-direction:column;gap:10px;flex:1;min-width:0}
+.post .text{font-size:15.5px;font-weight:500;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.post .titel{font-size:15px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.lang{font-size:14.5px;line-height:1.6;color:var(--ink2);white-space:pre-wrap;overflow-wrap:anywhere;max-width:68ch}
+.meta{font-size:12.5px;color:var(--sp-muted)}
 .zeile{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .abst{gap:6px}
-.akt{height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--sp-line);background:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;color:#3b4558}
-.akt svg{width:15px;height:15px}
-.akt[aria-pressed="true"]{background:#e9edf9;color:#26336b;border-color:#9fb0e0}
-.wahl{height:40px;padding:0 14px;border-radius:8px;border:1.5px solid var(--sp-line2);background:#fff;font-size:13.5px;font-weight:600;cursor:pointer}
-.wahl[aria-pressed="true"]{background:var(--sp-text);border-color:var(--sp-text);color:#fff}
+.akt{height:36px;padding:0 12px;border:1px solid var(--sp-line2);background:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--sp-text);transition:background .15s,border-color .15s}
+.akt:hover{border-color:var(--sp-text)}
+.akt svg{width:14px;height:14px}
+.akt[aria-pressed="true"]{background:var(--sp-text);color:#fff;border-color:var(--sp-text)}
+.wahl{height:40px;padding:0 16px;border:1px solid var(--sp-text);background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.wahl:hover{background:var(--sp-panel2)}
+.wahl[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
 .stapel{display:flex;margin-left:4px}
-.stapel>*{margin-left:-6px;border:2px solid #fff}
+.stapel>*{margin-left:-4px;border:2px solid #fff}
 .stapel>*:first-child{margin-left:0}
-.namen{font-size:12.5px;color:#26323c}
-.antwort{display:flex;gap:8px;align-items:flex-start}
-.antwort div{background:#f1f3f8;border-radius:12px;padding:6px 10px;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
-.tx{border:0;background:none;padding:0;min-height:32px;font-size:12.5px;font-weight:600;color:var(--sp-app-dunkel);cursor:pointer;text-decoration:underline}
-.marke-neu{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--neu);color:#fff}
-.marke-wichtig{font-size:12px;font-weight:700;color:#5c4400;display:flex;align-items:center;gap:4px}
-.gruppe{font-size:13px;font-weight:700;letter-spacing:.07em;color:#3b4558;text-transform:uppercase;margin-top:6px}
-.leer{color:var(--sp-muted);font-size:13.5px;padding:10px 4px}
-input[type=text],input[type=search],textarea,select.feld{border:1.5px solid var(--sp-line2);border-radius:var(--sp-radius-k);padding:9px 10px;background:#fff;width:100%;font-size:15px}
+.namen{font-size:13px;color:var(--ink2)}
+.antwort{display:flex;gap:10px;align-items:flex-start}
+.antwort div{background:var(--sp-panel2);border-left:2px solid var(--sp-line2);padding:6px 12px;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
+.antwort-form input{flex:1 1 140px;width:auto!important;height:40px!important;font-size:14px!important}
+.tx{border:0;background:none;padding:0;min-height:32px;font-size:13px;font-weight:500;color:var(--sp-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.tx:hover{color:var(--navy-hell)}
+.marke-neu{font-size:10.5px;font-weight:700;padding:3px 7px;background:var(--navy);color:#fff;line-height:1}
+.marke-wichtig{font-size:11px;font-weight:700;color:var(--sp-text);display:inline-flex;align-items:center;gap:4px}
+.gruppe{display:flex;align-items:center;gap:12px;font-size:12px;font-weight:600;color:var(--sp-text);margin-top:10px}
+.gruppe::after{content:"";flex:1;height:1px;background:var(--sp-line2)}
+.leer{color:var(--sp-muted);font-size:14px;padding:12px 0}
+input[type=text],input[type=search],textarea,select.feld{border:1px solid var(--sp-line2);border-radius:0;padding:10px 12px;background:#fff;width:100%;font-size:15px}
+input[type=text]:hover,input[type=search]:hover,textarea:hover{border-color:#9a9a95}
+input[type=text]:focus,input[type=search]:focus,textarea:focus{border-color:var(--sp-text);outline:none;box-shadow:inset 0 0 0 1px var(--sp-text)}
 input[type=text],input[type=search],select.feld{height:44px}
-.rund{border-radius:999px!important;background:#f1f3f8!important;border-color:#f1f3f8!important}
-.composer{background:#fff;border:1px solid #9fb0e0;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-.hinweis-dauer{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#1f5c50;background:#e4f1ee;padding:5px 10px;border-radius:999px}
-.composer select{height:36px;border:1px solid var(--sp-line2);border-radius:8px;background:#fff;font-size:13px;padding:0 6px}
-.haken{display:flex;align-items:center;gap:6px;font-size:13.5px;min-height:40px;cursor:pointer}
-.giltzeile{width:100%;display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:#fff;border:1px solid var(--sp-line);text-align:left;cursor:pointer;color:var(--sp-text)}
-.giltzeile.wichtig{background:var(--gelb);border-color:var(--gelb-rand)}
-.giltzeile .t{font-size:14px;font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.giltzeile .m{font-size:12px;color:var(--sp-muted)}
-.giltoffen{border-radius:10px;border:1px solid var(--sp-line);background:#fff;overflow:hidden}
-.giltoffen.wichtig{background:var(--gelb);border-color:var(--gelb-rand)}
-.giltoffen .giltzeile{border:0;background:transparent;border-radius:0}
-.giltoffen .inhalt{padding:0 14px 12px 50px;display:flex;flex-direction:column;gap:8px}
-.giltform label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
+.rund{border:0!important;border-bottom:1px solid var(--sp-line2)!important;padding-left:0!important;font-size:17px!important;height:48px!important}
+.rund:focus{box-shadow:none!important;border-bottom-color:var(--sp-text)!important}
+.composer{background:#fff;border:1px solid var(--sp-line);padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.composer .einr{padding-left:48px}
+@media (max-width:600px){.composer .einr{padding-left:0}}
+.hinweis-dauer{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink2);background:var(--beige);padding:6px 10px}
+.composer select{height:40px;border:1px solid var(--sp-line2);border-radius:0;background:#fff;font-size:13px;padding:0 8px}
+.haken{display:flex;flex-direction:row!important;align-items:center;gap:8px;font-size:14px;font-weight:400!important;min-height:44px;cursor:pointer}
+.giltzeile{width:100%;display:flex;gap:12px;align-items:center;padding:12px 14px;background:#fff;border:1px solid var(--sp-line);text-align:left;cursor:pointer;color:var(--sp-text);transition:border-color .15s}
+.giltzeile:hover{border-color:var(--sp-text)}
+.giltzeile.wichtig{background:var(--beige);border-color:var(--beige-rand)}
+.giltzeile .kern{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.giltzeile .t{font-size:14.5px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.giltzeile .t .marke-neu{margin-left:8px;vertical-align:2px}
+.giltzeile .t .marke-wichtig{display:flex;margin-bottom:3px}
+.giltzeile .m{font-size:12.5px;color:var(--sp-muted)}
+.giltoffen{border:1px solid var(--sp-text);background:#fff}
+.giltoffen.wichtig{background:var(--beige)}
+.giltoffen .giltzeile{border:0;background:transparent}
+.giltoffen .inhalt{padding:2px 16px 16px 56px;display:flex;flex-direction:column;gap:12px}
+@media (max-width:600px){.giltoffen .inhalt{padding:2px 14px 14px}}
+.giltform{border-color:var(--sp-text)!important}
+.giltform label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.giltform label .klein{text-transform:none;letter-spacing:0;font-weight:400}
 .fehler{color:var(--sp-err);font-size:13px;font-weight:600}
-.los{height:56px;padding:0 28px;border:0;border-radius:12px;background:var(--sp-app-dunkel);color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;gap:10px;cursor:pointer}
-.los:hover{background:var(--sp-app)}
-.gruss{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
-.gruss h1{margin:0;font-size:30px}
-#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--sp-text);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;max-width:90vw;z-index:9}
+.fehler:empty{display:none}
+.los{height:56px;padding:0 32px;border:0;background:var(--navy);color:#fff;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .15s}
+.los:hover{background:var(--navy-hell)}
+.gruss{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;padding-bottom:20px;border-bottom:1px solid var(--sp-text)}
+.gruss h1{margin:4px 0 0;font-size:clamp(28px,4.2vw,44px);font-weight:600;letter-spacing:-.02em;line-height:1.05;text-transform:uppercase}
+.gruss .cap{font-size:12px;font-weight:600;color:var(--sp-muted)}
+.fuss{justify-content:flex-end;gap:16px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;font-size:14px;max-width:90vw;z-index:9}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -179,72 +235,73 @@ input[type=text],input[type=search],select.feld{height:44px}
   <div id="meldungen"></div>
 
   <section id="zugang" class="karte" hidden>
-    <h1 id="zugangTitel" style="font-size:20px"></h1><p id="zugangText" style="margin:0"></p>
+    <h1 id="zugangTitel" class="titel-l"></h1><p id="zugangText" class="ohne"></p>
     <div class="zeile">
       <button class="sp-knopf sp-knopf-app" id="btnErlauben" type="button" hidden>Zugriff erlauben</button>
       <button class="sp-knopf sp-knopf-app" id="btnAnlegen" type="button" hidden>Ordner „_TeamKit“ anlegen</button>
       <button class="sp-knopf" id="btnWaehlen" type="button">Archivordner wählen …</button>
       <button class="sp-knopf" id="btnProbe" type="button">Nur ausprobieren</button>
     </div>
-    <p class="klein" style="margin:0">„Nur ausprobieren“ braucht keinen Ordner: Einträge bleiben dann allein in diesem Browser und sind für niemanden sonst sichtbar.</p>
+    <p class="klein ohne">„Nur ausprobieren“ braucht keinen Ordner: Einträge bleiben dann allein in diesem Browser und sind für niemanden sonst sichtbar.</p>
   </section>
 
   <!-- Guten Morgen: einmal am Tag -->
-  <section id="morgen" hidden style="display:flex;flex-direction:column;gap:20px">
-    <div class="gruss"><div><div class="klein" id="mDatum"></div><h1 id="mGruss"></h1></div><span class="frei"></span><button class="tx" type="button" data-aktion="los">Heute nicht mehr zeigen</button></div>
+  <section id="morgen" class="ansicht" hidden>
+    <div class="gruss"><div><div class="cap" id="mDatum"></div><h1 id="mGruss"></h1></div><span class="frei"></span><button class="tx" type="button" data-aktion="los">Heute nicht mehr zeigen</button></div>
     <section class="karte" id="mStatus"></section>
     <div class="zwei gleich">
       <section class="spalte"><div class="ue"><h3>Heute &amp; morgen</h3><span>verschwindet von selbst</span></div><div id="mBald" class="spalte"></div></section>
       <section class="spalte"><div class="ue"><h3>Neu für dich</h3><span id="mNeuZahl"></span></div><div id="mNeu" class="spalte"></div></section>
     </div>
-    <div class="zeile" style="justify-content:flex-end;gap:16px"><span class="klein">Morgen früh wieder – oder jederzeit über „Alles anzeigen“.</span>
+    <div class="zeile fuss"><span class="klein">Morgen früh wieder – oder jederzeit über „Alles anzeigen“.</span>
       <button class="los" type="button" data-aktion="los">Los geht’s <svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div>
   </section>
 
   <!-- Team: alles -->
-  <section id="team" hidden style="display:flex;flex-direction:column;gap:16px">
+  <section id="team" class="ansicht" hidden>
     <section class="karte" id="tStatus"></section>
     <div class="zwei">
       <section class="spalte">
         <form class="composer" id="kurzForm" novalidate>
-          <div class="zeile" style="flex-wrap:nowrap"><span id="kAva"></span><input type="text" class="rund" id="kText" maxlength="280" autocomplete="off" aria-label="Was gibt es Neues?" placeholder="Was gibt’s Neues?"></div>
-          <div class="zeile" style="padding-left:44px">
-            <span class="hinweis-dauer" id="kHinweis"><svg class="i" style="width:13px;height:13px" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="kHinweisText"></span></span>
+          <div class="zeile" style="flex-wrap:nowrap;gap:14px"><span id="kAva"></span><input type="text" class="rund" id="kText" maxlength="280" autocomplete="off" aria-label="Was gibt es Neues?" placeholder="Was gibt’s Neues?"></div>
+          <div class="zeile einr">
+            <span class="hinweis-dauer" id="kHinweis"><svg class="i i-s" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="kHinweisText"></span></span>
             <select id="kDauer" aria-label="Wie lange sichtbar?"><option value="auto">automatisch</option><option value="heute">bis heute Abend</option><option value="morgen">bis morgen</option><option value="uebermorgen">bis übermorgen</option><option value="woche">eine Woche</option></select>
             <label class="haken"><input type="checkbox" id="kUmfrage">Als Umfrage</label>
             <span class="frei"></span>
-            <button class="sp-knopf sp-knopf-app" type="submit" style="height:40px">Posten</button>
+            <button class="sp-knopf sp-knopf-app k" type="submit">Posten</button>
           </div>
           <div class="fehler" id="kFehler" role="alert"></div>
         </form>
         <div id="tKurz" class="spalte"></div>
       </section>
       <section class="spalte gilt">
-        <div class="zeile"><h2 style="margin:0;font-size:17px">Gilt jetzt</h2><span class="klein">bleibt, bis es erledigt ist</span><span class="frei"></span>
-          <button class="sp-knopf" id="btnNeueRegel" type="button" style="height:40px"><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Neue Regel / Neuigkeit</button></div>
-        <form class="karte giltform" id="giltForm" hidden novalidate style="border-color:#9fb0e0">
-          <h3 id="gfTitel" style="margin:0;font-size:15px">Neu fürs Büro</h3>
+        <div class="ue"><h2>Gilt jetzt</h2><span>bleibt, bis es erledigt ist</span></div>
+        <div class="zeile">
+          <button class="sp-knopf k" id="btnNeueRegel" type="button"><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Neue Regel / Neuigkeit</button></div>
+        <form class="karte giltform" id="giltForm" hidden novalidate>
+          <h3 id="gfTitel" class="titel-m">Neu fürs Büro</h3>
           <label>Überschrift<input type="text" id="gTitel" maxlength="120" autocomplete="off"></label>
-          <label>Text<textarea id="gText" rows="3" maxlength="800"></textarea><span class="klein" style="font-weight:400">Kurz halten: worum geht es, was ist ab jetzt anders?</span></label>
+          <label>Text<textarea id="gText" rows="3" maxlength="800"></textarea><span class="klein">Kurz halten: worum geht es, was ist ab jetzt anders?</span></label>
           <label>Link oder Dateipfad (freiwillig)<input type="text" id="gLink" maxlength="300" autocomplete="off"></label>
-          <label class="haken" style="flex-direction:row;font-weight:400"><input type="checkbox" id="gWichtig">Wichtig – oben anheften</label>
+          <label class="haken"><input type="checkbox" id="gWichtig">Wichtig – oben anheften</label>
           <div class="fehler" id="gFehler" role="alert"></div>
           <div class="zeile" style="justify-content:flex-end"><span class="klein frei" id="gName"></span><button class="sp-knopf" type="button" id="gAbbrechen">Abbrechen</button><button class="sp-knopf sp-knopf-app" type="submit" id="gSenden">Posten</button></div>
         </form>
-        <div id="tGilt" class="spalte" style="gap:8px"></div>
+        <div id="tGilt" class="spalte eng"></div>
         <button class="tx" type="button" id="btnArchiv" style="align-self:flex-start">Archiv durchsuchen</button>
       </section>
     </div>
   </section>
 
   <section id="archiv" hidden class="karte">
-    <div class="zeile"><h2 style="font-size:19px">Archiv: erledigte Neuigkeiten</h2><span class="frei"></span><button class="sp-knopf" type="button" data-aktion="zu-team">Zurück</button></div>
+    <div class="zeile"><h2 class="titel-l">Archiv: erledigte Neuigkeiten</h2><span class="frei"></span><button class="sp-knopf" type="button" data-aktion="zu-team">Zurück</button></div>
     <input type="search" id="aSuche" placeholder="Suchen …" aria-label="Archiv durchsuchen">
-    <div id="aListe" class="spalte" style="gap:8px"></div>
+    <div id="aListe" class="spalte eng"></div>
   </section>
 
   <section id="ueber" class="karte" hidden>
-    <h2 style="font-size:19px">TeamKit <span id="version" class="klein"></span></h2>
+    <h2 class="titel-l">TeamKit <span id="version" class="klein"></span></h2>
     <p style="margin:0">Wer ist heute wo, was ist heute und morgen los, und was gilt im Büro. Alles liegt im Ordner <code>_TeamKit</code> im Archivordner – je Beitrag eine kleine Datei. TeamKit liest sonst nur die Mitarbeiterliste und fasst keine Projektordner an. Nichts verlässt das Büro.</p>
     <p style="margin:0">Fotos: <code>_TeamKit\Fotos\&lt;Kürzel&gt;.jpg</code> (Kürzel wie am Ende der Projektordner, z. B. <code>Nad.jpg</code>). Wer kein Foto hat, erscheint mit seinem Kürzel.</p>
     <ul id="aenderungen" class="klein" style="margin:0;padding-left:18px"></ul>
@@ -262,8 +319,9 @@ input[type=text],input[type=search],select.feld{height:44px}
      r-<Beitrags-ID>~<Kürzel>.json     Reaktion einer Person (Umfrage, Danke, Antworten)
      s~<Kürzel>.json                   Status heute (wird jeden Tag überschrieben – kein Verlauf)
    Liest: Fotos/<Kürzel>.jpg|png und <Archivordner>/_Spektron-Mitarbeiter.json. Löscht nie Dateien. */
-const APP_VERSION = '0.2.0';
+const APP_VERSION = '0.3.0';
 const AENDERUNGEN = [
+  ['0.3.0', '17.11.2026', 'Neues Aussehen: ruhig und redaktionell – eckige Karten mit Haarlinien, Schrift Inter (liegt in der App, kein Netz nötig), Überschriften in Versalien, dunkles Navy für Knöpfe, Status als Raster mit farbigem Merker.'],
   ['0.2.0', '17.11.2026', 'Neu aufgebaut nach Claudes Entwurf: Guten-Morgen-Seite einmal am Tag, Status „Heute im Büro“ (ohne Verlauf), „Heute & morgen“ nach Tagen mit automatischer Dauer aus dem Text („morgen“, „Freitag“, „20.11.“), „Gilt jetzt“ bis erledigt mit Archiv, Fotos aus _TeamKit\\Fotos, „Zurück zum Projekt“ beim Öffnen aus der Projektzentrale.'],
   ['0.1.0', '17.11.2026', 'Erste Fassung mit zwei Reitern (ersetzt).'],
 ];
@@ -358,14 +416,14 @@ function toast(text, ms) { const t = $('toast'); t.textContent = text; t.hidden 
 function meldung(art, html, id) {
   S.meldungen = S.meldungen.filter(m => m.id !== id);
   if (html) S.meldungen.push({ art, html, id });
-  $('meldungen').innerHTML = S.meldungen.map(m => `<div class="meldung ${m.art}" style="margin-bottom:8px">${m.html}</div>`).join('');
+  $('meldungen').innerHTML = S.meldungen.map(m => `<div class="meldung ${m.art}">${m.html}</div>`).join('');
 }
 const ICON = {
   danke: '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11"/><path d="M15 5.9 14 10h5.8a2 2 0 0 1 2 2.3l-1.4 7a2 2 0 0 1-2 1.7H7V10l4-8a3 3 0 0 1 3 3.9z"/></svg>',
   antw: '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.8 7L3 21l2-6.2A8 8 0 1 1 21 12z"/></svg>',
-  pin: '<svg class="i" style="width:14px;height:14px" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>',
-  auf: '<svg class="i" style="width:16px;height:16px;color:#5a6474" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
-  zu: '<svg class="i" style="width:16px;height:16px;color:#5a6474" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  pin: '<svg class="i i-s" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>',
+  auf: '<svg class="i i-m" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  zu: '<svg class="i i-m" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
 };
 
 /* ---------- Personen, Fotos ---------- */
@@ -375,7 +433,7 @@ function ich() {
 }
 const istIch = v => { const p = ich(); return !!p && !!v && p.kuerzel === v.kuerzel; };
 const vorname = name => (String(name).split(/\s+/).filter(w => w && !/^(dr|prof)\.?$/i.test(w))[0]) || name;
-const FARBEN = ['#4558a6', '#2f7d6d', '#7a5ca8', '#b0683c', '#2f87a6', '#5b6b78', '#93405a'];
+const FARBEN = ['#1c2a44', '#3d4f45', '#6b5644', '#4a4a46', '#5a4a5e', '#2f3e4f', '#7a5f48'];
 function ava(v, s) {
   s = s || 36; v = v || { kuerzel: '?', name: '?' };
   const p = S.personen.find(x => x.ordnerKuerzel === v.kuerzel);
@@ -599,13 +657,13 @@ function statusHtml() {
   const pill = s => `<span class="pille ${s ? 'p-' + s : ''}">${s || 'nicht gesetzt'}</span>`;
   return `<div class="ue"><h3>Heute im Büro</h3><span>freiwillig · gilt nur heute · kein Verlauf</span></div>
     <div class="status-ich">${p ? ava(p, 32) : ''}<b>${p ? 'Du heute:' : 'Heute:'}</b>${knoepfe}</div>
-    ${leute.length ? `<div class="leute">${leute.map(x => `<div class="person${x.s ? '' : ' leer'}">${ava(x.v, 30)}${esc(vorname(x.v.name))}${pill(x.s)}</div>`).join('')}</div>` : ''}`;
+    ${leute.length ? `<div class="leute">${leute.map(x => `<div class="person${x.s ? '' : ' leer'}">${ava(x.v, 30)}<span class="name">${esc(vorname(x.v.name))}</span>${pill(x.s)}</div>`).join('')}</div>` : ''}`;
 }
 function namenListe(l) { return l.map(x => istIch(x.von) ? 'du' : esc(vorname(x.von.name))).join(', '); }
 function antwortenHtml(e, r) {
   const a = r.flatMap(x => x.texte.map(t => ({ ...t, von: x.von }))).sort((x, y) => x.am.localeCompare(y.am));
   return a.map(t => `<div class="antwort">${ava(t.von, 26)}<div><b>${esc(vorname(t.von.name))}</b> ${esc(t.text)}</div></div>`).join('')
-    + (S.antwortOffen === e.id ? `<form class="zeile abst" data-antwort="${e.id}" novalidate><input type="text" maxlength="200" aria-label="Antwort" placeholder="Antwort …" style="flex:1 1 140px;width:auto;height:40px;font-size:14px"><button class="akt" type="submit">Senden</button></form>` : '');
+    + (S.antwortOffen === e.id ? `<form class="zeile abst antwort-form" data-antwort="${e.id}" novalidate><input type="text" maxlength="200" aria-label="Antwort" placeholder="Antwort …"><button class="akt" type="submit">Senden</button></form>` : '');
 }
 function aktionenHtml(e, r, mitDanke) {
   const mein = r.find(x => istIch(x.von)), danke = r.filter(x => x.danke).length, antw = r.reduce((s, x) => s + x.texte.length, 0);
@@ -637,11 +695,11 @@ function linkHtml(l) {
 function giltHtml(e, imArchiv) {
   const offen = S.offen.has(e.id), neu = !imArchiv && e.am > S.giltGesehenAnzeige && !istIch(e.von), r = S.reakt.get(e.id) || [];
   const kopf = `<button class="giltzeile${e.wichtig && !offen && !e.erledigt ? ' wichtig' : ''}" type="button" data-aktion="auf" data-id="${e.id}" aria-expanded="${offen}">${ava(e.von, 30)}
-    <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span class="t">${e.wichtig && !e.erledigt ? `<span class="marke-wichtig">${ICON.pin}</span>` : ''}${esc(e.titel)}${neu ? '<span class="marke-neu">Neu</span>' : ''}</span>
+    <span class="kern"><span class="t">${e.wichtig && !e.erledigt ? `<span class="marke-wichtig">${ICON.pin}Wichtig</span>` : ''}${esc(e.titel)}${neu ? '<span class="marke-neu">Neu</span>' : ''}</span>
     <span class="m">${esc(vorname(e.von.name))} · ${e.erledigt ? `vom ${datum(e.am)} · erledigt ${datum(e.erledigt.am)}` : seit(e.am) + (e.geaendert ? ' · geändert' : '')}</span></span>${offen ? ICON.auf : ICON.zu}</button>`;
   if (!offen) return kopf;
   return `<div class="giltoffen${e.wichtig && !e.erledigt ? ' wichtig' : ''}">${kopf}<div class="inhalt">
-    ${e.text ? `<div class="post" style="padding:0;border:0;background:none"><span class="lang">${esc(e.text)}</span></div>` : ''}${e.link ? `<div>${linkHtml(e.link)}</div>` : ''}
+    ${e.text ? `<span class="lang">${esc(e.text)}</span>` : ''}${e.link ? `<div>${linkHtml(e.link)}</div>` : ''}
     <div class="zeile abst">${aktionenHtml(e, r, true)}</div>${antwortenHtml(e, r)}
     ${istIch(e.von) ? `<div class="zeile" style="gap:14px">${e.erledigt ? frageHtml(e, 'wieder', '', 'Wieder aktiv machen') : `<button class="tx" type="button" data-aktion="g-bearbeiten" data-id="${e.id}">Bearbeiten</button>${frageHtml(e, 'erledigt', '', 'Erledigt – ins Archiv')}`}</div>` : ''}
   </div></div>`;

@@ -3,8 +3,8 @@
    laufen nie hierüber. Berührt nur Caches mit eigenem Präfix. */
 const SCOPE = self.registration.scope;
 const PREFIX = 'teamkit:' + SCOPE + ':';
-const CACHE = PREFIX + 'v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'].map(f => new URL(f, SCOPE).href);
+const CACHE = PREFIX + 'v2';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './fonts/inter-latin-wght-normal.woff2'].map(f => new URL(f, SCOPE).href);
 const INDEX = new URL('index.html', SCOPE).href;
 
 self.addEventListener('install', e => {
