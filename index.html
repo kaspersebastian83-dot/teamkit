@@ -236,7 +236,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
 <body>
 <header class="kopf">
   <span class="marke" id="marke"><img src="icon.svg" alt="">TeamKit</span>
-  <button class="zurueck" id="btnZurueck" type="button" hidden><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg><span id="zurueckText">Zurück zum Projekt</span></button>
+  <button class="zurueck" id="btnZurueck" type="button" hidden><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg><span id="zurueckText">Zurück zur Projektzentrale</span></button>
   <span class="frei"></span>
   <button class="sp-knopf" id="btnZuTeam" type="button" hidden>Alles anzeigen</button>
   <button class="icon" id="btnNeuLaden" type="button" aria-label="Neu laden" title="Neu laden" hidden><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
@@ -253,7 +253,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
   <div id="meldungen"></div>
 
   <section id="zugang" class="karte" hidden>
-    <h1 id="zugangTitel" class="titel-l"></h1><p id="zugangText" class="ohne"></p>
+    <h1 id="zugangTitel" class="titel-l" tabindex="-1"></h1><p id="zugangText" class="ohne"></p>
     <div class="zeile">
       <button class="sp-knopf sp-knopf-app" id="btnErlauben" type="button" hidden>Zugriff erlauben</button>
       <button class="sp-knopf sp-knopf-app" id="btnAnlegen" type="button" hidden>Ordner „_TeamKit“ anlegen</button>
@@ -326,6 +326,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
     <h2 class="titel-l">TeamKit <span id="version" class="klein"></span></h2>
     <p class="ohne">Was ist heute und morgen los, und was gilt im Büro. Alles liegt im Ordner <code>_TeamKit</code> im Archivordner – je Beitrag eine kleine Datei. TeamKit liest sonst nur die Mitarbeiterliste und fasst keine Projektordner an. Nichts verlässt das Büro.</p>
     <p style="margin:0">Fotos: <code>_TeamKit\Fotos\&lt;Kürzel&gt;.jpg</code> (Kürzel wie am Ende der Projektordner, z. B. <code>Nad.jpg</code>). Wer kein Foto hat, erscheint mit seinen Initialen.</p>
+    <p class="ohne klein">Einbettung: Die Projektzentrale lädt TeamKit unsichtbar als <code>?eingebettet=1</code> und spricht per Nachricht mit ihm (nur gleiche Adresse). TeamKit meldet seinen Stand („stand“) und „schliessen“; die Projektzentrale schickt „oeffnen“ und „zu“. Solange TeamKit unsichtbar ist, gilt nichts als gesehen.</p>
     <ul id="aenderungen" class="klein" style="margin:0;padding-left:18px"></ul>
     <div class="zeile"><button class="sp-knopf" type="button" data-aktion="zu-team">Zurück</button></div>
   </section>
@@ -342,8 +343,9 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
      g-<JJJJMMTT>-<zufall>.json        „Gilt jetzt“-Beitrag, bleibt bis „erledigt“
      r-<Beitrags-ID>~<Kürzel>.json     Reaktion einer Person (Umfrage, Danke, Antworten)
    Liest: Fotos/<Kürzel>.jpg|png und <Archivordner>/_Spektron-Mitarbeiter.json. Löscht nie Dateien. */
-const APP_VERSION = '0.4.4';
+const APP_VERSION = '0.5.0';
 const AENDERUNGEN = [
+  ['0.5.0', '17.11.2026', 'Vorbereitet für die Projektzentrale: TeamKit läuft dort unsichtbar im Rahmen, meldet seinen Stand auch ohne Zugriff (bereit/grund), öffnet sich auf Nachricht – auf Wunsch direkt bei einem „Gilt jetzt“-Beitrag – und schließt mit „Zurück“ oder Esc. Unsichtbar geladen gilt nichts als gesehen. Testseite rahmen-test.html.'],
   ['0.4.4', '17.11.2026', 'Öffnet TeamKit direkt die Team-Ansicht, sind nur noch wirklich neue „Gilt jetzt“-Beiträge als „Neu“ markiert (vorher jedes Mal alle von anderen).'],
   ['0.4.3', '17.11.2026', 'Schneller auf dem Netzlaufwerk (Termine heißen nach ihrem Tag, es wird nur noch gut zwei Monate zurück gelesen). Datum im Text robuster („0.4.2“, „31.02.“ zählen nicht). Guten Morgen mit mehr als drei Neuigkeiten behält die „Neu“-Marken. Änderungen gehen beim Tippen nicht mehr verloren. Kalender: Fokus bleibt beim Blättern, Monat wird angesagt, größere Tasten auf dem Handy, Klick auf einen Tag mit Terminen markiert sie. Kein doppeltes Datum an Terminen.'],
   ['0.4.2', '17.11.2026', 'Termine: die ganze Karte im Ton ihrer Farbe, Datumsschild farbig gefüllt.'],
@@ -375,7 +377,7 @@ const SUITE = {
 const S = {
   archiv: null, tk: null, schreiben: false, probe: false,
   personen: [], kurz: [], gilt: [], reakt: new Map(), fotos: new Map(), cache: new Map(),
-  ansicht: 'zugang', offen: new Set(), giltBearbeite: null, giltZeigen: false, antwortOffen: '', frage: '', meldungen: [],
+  ansicht: 'zugang', grund: '', offen: new Set(), giltBearbeite: null, giltZeigen: false, antwortOffen: '', frage: '', meldungen: [],
   giltGesehenAnzeige: '', stand: '', termin: null, kalMonat: null, morgenNeu: 0, renderFaellig: false, tagStand: '',
 };
 
@@ -530,9 +532,10 @@ function zeige(id) {
 }
 function zugang(titel, text, opt) {
   opt = opt || {};
+  S.grund = opt.grund || 'archiv';
   $('zugangTitel').textContent = titel; $('zugangText').innerHTML = text;
   $('btnErlauben').hidden = !opt.erlauben; $('btnAnlegen').hidden = !opt.anlegen; $('btnWaehlen').hidden = !!opt.keinWaehlen;
-  zeige('zugang');
+  zeige('zugang'); melden();
 }
 async function erlaubt(h, mode, fragen) {
   if (S.probe) return true;
@@ -541,27 +544,27 @@ async function erlaubt(h, mode, fragen) {
 async function start() {
   $('version').textContent = 'v' + APP_VERSION;
   $('aenderungen').innerHTML = AENDERUNGEN.map(a => `<li><b>${esc(a[0])}</b> (${esc(a[1])}): ${esc(a[2])}</li>`).join('');
-  if (EIN) { $('marke').hidden = true; $('btnZurueck').hidden = false; if (PARAM.get('projekt')) $('zurueckText').textContent = 'Zurück zum Projekt ' + PARAM.get('projekt').slice(0, 40); }
+  if (EIN) { $('marke').hidden = true; $('btnZurueck').hidden = false; if (PARAM.get('projekt')) $('zurueckText').textContent = 'Zurück zum Projekt ' + PARAM.get('projekt').slice(0, 40); }   // ?projekt= nur noch zur Kompatibilität – Hauptweg ist „oeffnen“
   if (/^https?:$/.test(location.protocol) && location.hostname !== '127.0.0.1' && 'serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
   if (PARAM.has('probe')) return probeStart();
-  if (!('showDirectoryPicker' in window)) { zugang('Bitte Edge oder Chrome benutzen', 'TeamKit braucht den Zugriff auf Ordner, den nur Edge und Chrome haben.', { keinWaehlen: true }); return; }
+  if (!('showDirectoryPicker' in window)) { zugang('Bitte Edge oder Chrome benutzen', 'TeamKit braucht den Zugriff auf Ordner, den nur Edge und Chrome haben.', { keinWaehlen: true, grund: 'browser' }); return; }
   let h = null;
   try { h = await SUITE.get('teamkit-archiv') || await SUITE.get('archiv'); } catch (e) { h = null; }
-  if (!h) { zugang('Archivordner wählen', 'Wähle einmal den Ordner, in dem alle Projektordner liegen – im Büro <code>C:\\Daten\\Mosaik Archivordner</code>. Hast du ihn schon in der Projektzentrale gewählt, öffne TeamKit am besten einmal von dort.'); return; }
+  if (!h) { zugang('Archivordner wählen', 'Wähle einmal den Ordner, in dem alle Projektordner liegen – im Büro <code>C:\\Daten\\Mosaik Archivordner</code>. Hast du ihn schon in der Projektzentrale gewählt, öffne TeamKit am besten einmal von dort.', { grund: 'archiv' }); return; }
   S.archiv = h; await verbinden(false);
 }
 async function probeStart() {
   try { S.archiv = await navigator.storage.getDirectory(); S.tk = await S.archiv.getDirectoryHandle(TK_ORDNER, { create: true }); }
-  catch (e) { zugang('Ausprobieren geht hier nicht', 'Dieser Browser erlaubt keinen eigenen Speicher für die Probe.'); return; }
+  catch (e) { zugang('Ausprobieren geht hier nicht', 'Dieser Browser erlaubt keinen eigenen Speicher für die Probe.', { grund: 'browser' }); return; }
   S.probe = true; S.schreiben = true;
   meldung('info', '<span>Probe-Modus: Beiträge bleiben nur in diesem Browser und sind für niemanden sonst sichtbar.</span>', 'probe');
   await bereit();
 }
 async function verbinden(fragen) {
-  S.tk = null; S.probe = false; meldung('', '', 'probe');
-  if (!(await erlaubt(S.archiv, 'read', fragen))) { zugang('Zugriff auf den Archivordner', `TeamKit darf den Archivordner „${esc(S.archiv.name)}“ gerade nicht lesen. Der Browser fragt einmal nach.`, { erlauben: true }); return; }
+  S.tk = null; S.probe = false; S.grund = ''; meldung('', '', 'probe');
+  if (!(await erlaubt(S.archiv, 'read', fragen))) { zugang('Zugriff auf den Archivordner', `TeamKit darf den Archivordner „${esc(S.archiv.name)}“ gerade nicht lesen. Der Browser fragt einmal nach.`, { erlauben: true, grund: 'zugriff' }); return; }
   try { S.tk = await S.archiv.getDirectoryHandle(TK_ORDNER); }
-  catch (e) { zugang('Ordner „_TeamKit“ fehlt', `Im Archivordner „${esc(S.archiv.name)}“ gibt es noch keinen Ordner <code>_TeamKit</code>. Dort liegen später alle Beiträge. Das Anlegen ist einmal nötig.`, { anlegen: true }); return; }
+  catch (e) { zugang('Ordner „_TeamKit“ fehlt', `Im Archivordner „${esc(S.archiv.name)}“ gibt es noch keinen Ordner <code>_TeamKit</code>. Dort liegen später alle Beiträge. Das Anlegen ist einmal nötig.`, { anlegen: true, grund: 'ordner' }); return; }
   S.schreiben = await erlaubt(S.tk, 'readwrite', fragen);
   meldung('warn', S.schreiben ? '' : '<span>TeamKit darf noch nicht in <code>_TeamKit</code> schreiben. Lesen geht, Schreiben erst nach deiner Erlaubnis.</span><button class="sp-knopf" type="button" data-aktion="schreiben">Schreiben erlauben</button>', 'schreiben');
   await bereit();
@@ -570,7 +573,9 @@ async function bereit() {
   await personenLaden(); await fotosLaden(); await laden(); ichBanner();
   const start = PARAM.get('start');
   if (start !== 'team' && (start === 'morgen' || morgenFaellig())) zeige('morgen');
-  else zuTeam();   // auch direkt in die Team-Ansicht: „Neu“ ab dem letzten Besuch, danach als gesehen merken
+  else if (EIN) teamZeigen();   // im Rahmen unsichtbar geladen: nichts als gesehen merken – das tun nur „Los geht’s“, „Zurück“, Esc, „Alles anzeigen“
+  else zuTeam();   // direkt in die Team-Ansicht: „Neu“ ab dem letzten Besuch, danach als gesehen merken
+  melden();
 }
 async function archivWaehlen() {
   let h; try { h = await window.showDirectoryPicker({ id: 'teamkit-archiv', mode: 'read' }); } catch (e) { return; }
@@ -643,10 +648,13 @@ const morgenFaellig = () => lokal.get('teamkit-morgen') !== isoTag(new Date()) &
 /** Für eine Projektzentrale, die TeamKit einbettet: Stand melden (nur an dieselbe Adresse). */
 function melden() {
   if (window.parent === window) return;
+  if (!S.tk || (S.ansicht === 'zugang' && S.grund)) { an({ quelle: 'teamkit', art: 'stand', bereit: false, grund: S.grund || 'archiv' }); return; }   // PZ zeigt dann den Knopf ohne Zahl
   const n = giltNeu().sort((a, b) => (b.wichtig - a.wichtig) || b.am.localeCompare(a.am)), s = n[0];
-  try { window.parent.postMessage({ quelle: 'teamkit', art: 'stand', neuGilt: n.length, heute: kurzBald().length, morgenFaellig: morgenFaellig(),
-    schlagzeile: s ? { titel: s.titel, von: s.von.name, am: s.am, wichtig: s.wichtig } : null }, location.origin); } catch (e) { /* fremder Rahmen */ }
+  an({ quelle: 'teamkit', art: 'stand', bereit: true, neuGilt: n.length, heute: kurzBald().length, morgenFaellig: morgenFaellig(),
+    schlagzeile: s ? { id: s.id, titel: s.titel, von: s.von.name, am: s.am, wichtig: s.wichtig } : null });
 }
+/** Nachricht an die Projektzentrale – nur an dieselbe Adresse. */
+function an(o) { try { window.parent.postMessage(o, location.origin); } catch (e) { /* fremder Rahmen */ } }
 
 /* ---------- Schreiben ---------- */
 async function schreibe(name, obj) {
@@ -819,14 +827,18 @@ function verlasseMorgen() {
   S.antwortOffen = ''; S.offen.clear();
   if (S.morgenNeu > 3) { zuTeam(); return; }   // nicht alles gesehen: „Neu“-Marken bleiben, auch eingebettet (dort gibt es „Zurück zum Projekt“)
   lokal.set('teamkit-gilt-gesehen', new Date().toISOString());
-  if (EIN) { melden(); try { window.parent.postMessage({ quelle: 'teamkit', art: 'schliessen' }, location.origin); } catch (e) { /* fremder Rahmen */ } }
+  if (EIN) { melden(); an({ quelle: 'teamkit', art: 'schliessen' }); }
   else zuTeam();
 }
-function zuTeam() {
+/** Team-Ansicht mit „Neu“-Marken ab dem letzten Besuch – merkt selbst nichts als gesehen. */
+function teamZeigen() {
   S.giltGesehenAnzeige = giltGesehen();
   for (const e of giltNeu()) S.offen.add(e.id);
-  lokal.set('teamkit-gilt-gesehen', new Date().toISOString()); melden();
   zeige('team');
+}
+function zuTeam() {
+  teamZeigen();
+  lokal.set('teamkit-gilt-gesehen', new Date().toISOString()); melden();
 }
 
 /* ---------- Formulare ---------- */
@@ -895,7 +907,49 @@ document.addEventListener('submit', ev => {
   const text = f.querySelector('input').value.trim(), id = f.dataset.antwort; if (!text) return;
   S.antwortOffen = ''; reaktion(id, o => { o.texte.push({ text: text.slice(0, 200), am: new Date().toISOString() }); });
 });
-$('btnZurueck').onclick = () => { if (S.ansicht === 'morgen') { verlasseMorgen(); return; } lokal.set('teamkit-gilt-gesehen', new Date().toISOString()); melden(); try { window.parent.postMessage({ quelle: 'teamkit', art: 'schliessen' }, location.origin); } catch (e) { /* fremder Rahmen */ } };
+/** „Zurück“ im Rahmen (Knopf oder Esc): Guten Morgen wie „Los geht’s“, sonst als gesehen merken und schließen. */
+function zurueck() {
+  if (S.ansicht === 'morgen') { verlasseMorgen(); return; }
+  if (S.tk && S.ansicht !== 'zugang') lokal.set('teamkit-gilt-gesehen', new Date().toISOString());
+  S.antwortOffen = ''; S.frage = ''; melden(); an({ quelle: 'teamkit', art: 'schliessen' });
+}
+$('btnZurueck').onclick = zurueck;
+const giltFormLeer = () => !$('gTitel').value.trim() && !$('gText').value.trim() && !$('gLink').value.trim();
+document.addEventListener('keydown', ev => {
+  if (!EIN || ev.key !== 'Escape' || ev.defaultPrevented) return;
+  if ($('mehr').open) { $('mehr').open = false; return; }
+  const antw = document.querySelector('form[data-antwort] input');
+  if ((S.giltZeigen && !giltFormLeer()) || (antw && antw.value.trim())) return;   // nichts Getipptes verwerfen
+  ev.preventDefault(); zurueck();
+});
+/** Fokus nach dem Öffnen: Überschrift des Zugangs, „Los geht’s“ oder das Eingabefeld. */
+function fokusErstes() {
+  const el = S.ansicht === 'zugang' ? $('zugangTitel') : S.ansicht === 'morgen' ? document.querySelector('#morgen .los') : S.ansicht === 'team' ? $('kText') : null;
+  if (el) el.focus({ preventScroll: true });
+}
+async function oeffnen(d) {
+  const pr = typeof d.projekt === 'string' ? d.projekt.trim().slice(0, 40) : '';
+  $('zurueckText').textContent = pr ? 'Zurück zum Projekt ' + pr : 'Zurück zur Projektzentrale';
+  if (S.tk) await laden();
+  if (!S.tk || S.ansicht === 'zugang') { fokusErstes(); return; }   // Zugang bleibt – der Klick im sichtbaren Rahmen darf dann nach der Erlaubnis fragen
+  const id = typeof d.id === 'string' ? d.id : '', e = id && giltAktiv().find(x => x.id === id);
+  if (e) {
+    S.offen.add(id); teamZeigen();
+    const k = document.querySelector(`#tGilt [data-aktion="auf"][data-id="${CSS.escape(id)}"]`);
+    if (k) { k.scrollIntoView({ block: 'center' }); k.focus({ preventScroll: true }); }
+  } else { if (morgenFaellig()) zeige('morgen'); else teamZeigen(); fokusErstes(); }
+  melden();
+}
+function zu() {
+  S.antwortOffen = ''; S.frage = '';
+  if (S.giltZeigen && giltFormLeer()) { S.giltZeigen = false; S.giltBearbeite = null; }
+  render(); melden();
+}
+window.addEventListener('message', ev => {
+  if (!EIN || ev.source !== window.parent || ev.origin !== location.origin || !ev.data || ev.data.quelle !== 'projektzentrale') return;
+  if (ev.data.art === 'oeffnen') oeffnen(ev.data);
+  else if (ev.data.art === 'zu') zu();
+});
 $('btnZuTeam').onclick = () => { lokal.set('teamkit-morgen', isoTag(new Date())); zuTeam(); };
 $('btnErlauben').onclick = () => verbinden(true);
 $('btnAnlegen').onclick = ordnerAnlegen;

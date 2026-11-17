@@ -29,7 +29,27 @@ Gelesen werden `k-`-Dateien (und ihre Reaktionen) der letzten gut zwei Monate (`
 - Im Büro: Archivordner wie in der Projektzentrale (Browser-Speicher `mosaik-suite` → `archiv`). Fehlt `_TeamKit`, legt ein Knopf den Ordner an.
 - `?probe=1` oder „Nur ausprobieren“: ohne Ordner, Beiträge bleiben nur in diesem Browser.
 - `?start=morgen|team`: Ansicht erzwingen.
-- `?eingebettet=1&projekt=26.0527`: für die Projektzentrale – statt der Marke ein Knopf „Zurück zum Projekt 26.0527“. TeamKit meldet dem umgebenden Fenster (nur gleiche Adresse) per `postMessage`:
-  `{ quelle:'teamkit', art:'stand', neuGilt, heute, morgenFaellig, schlagzeile:{ titel, von, am, wichtig } | null }` und `{ quelle:'teamkit', art:'schliessen' }`.
+- `?eingebettet=1`: für die Projektzentrale (siehe unten). `&projekt=26.0527` funktioniert noch, ist aber nicht mehr der Hauptweg.
 
-Die Anbindung an die Projektzentrale (Knopf „Team“ mit Zähler, dünne Schlagzeile, Guten Morgen beim ersten Öffnen am Tag) ist noch nicht gebaut.
+## Einbettung (Projektzentrale)
+
+Die Projektzentrale (gleiche Adresse `kaspersebastian83-dot.github.io`) lädt TeamKit unsichtbar als `../teamkit/?eingebettet=1` in einen Rahmen unter ihrer 52-px-Leiste. Statt der Marke zeigt TeamKit dann „Zurück zur Projektzentrale“ bzw. „Zurück zum Projekt …“. Nachrichten gehen per `postMessage` nur an und von derselben Adresse; TeamKit nimmt nur Nachrichten vom eigenen Elternfenster an.
+
+**TeamKit → Projektzentrale**
+
+| Nachricht | Wann |
+|---|---|
+| `{ quelle:'teamkit', art:'stand', bereit:false, grund:'zugriff'\|'ordner'\|'archiv'\|'browser' }` | TeamKit kann (noch) nicht lesen: keine Erlaubnis, `_TeamKit` fehlt, kein Archivordner gewählt, falscher Browser. Die PZ zeigt den Knopf ohne Zahl. |
+| `{ quelle:'teamkit', art:'stand', bereit:true, neuGilt, heute, morgenFaellig, schlagzeile:{ id, titel, von, am, wichtig } \| null }` | nach dem Start und nach jedem Nachlesen. `schlagzeile` = neuester neuer „Gilt jetzt“-Beitrag, „Wichtig“ zuerst; die PZ zeigt sie nur bei `wichtig`. |
+| `{ quelle:'teamkit', art:'schliessen' }` | „Zurück“, Esc oder „Los geht’s“ auf der Guten-Morgen-Seite – die PZ blendet den Rahmen aus. |
+
+**Projektzentrale → TeamKit**
+
+| Nachricht | Wirkung |
+|---|---|
+| `{ quelle:'projektzentrale', art:'oeffnen', projekt?, id? }` | Rahmen wird sichtbar: TeamKit liest neu und zeigt Guten Morgen (wenn fällig) oder die Team-Ansicht; mit `id` direkt diesen „Gilt jetzt“-Beitrag geöffnet. Ohne Zugriff bleibt der Zugangs-Schirm – der Klick im sichtbaren Rahmen kann dann nach der Erlaubnis fragen. `projekt` setzt „Zurück zum Projekt …“. |
+| `{ quelle:'projektzentrale', art:'zu' }` | die PZ hat den Rahmen selbst ausgeblendet (z. B. Esc in der PZ): offene Antworten/Rückfragen zu, leeres „Gilt jetzt“-Formular zu, Stand melden. |
+
+Solange TeamKit unsichtbar im Rahmen liegt, gilt nichts als gesehen: `teamkit-morgen` und `teamkit-gilt-gesehen` setzen nur „Los geht’s“, „Zurück“/Esc, „Alles anzeigen“ und „Zurück“ aus Archiv/Über.
+
+**Testseite:** `rahmen-test.html` bettet TeamKit genau so ein, zeigt alle Nachrichten mit Uhrzeit und den Stand („bereit: ja/nein“). `rahmen-test.html?probe=1` lädt TeamKit im Probe-Modus. Die Seite enthält keine Daten und liegt nicht im Offline-Speicher.

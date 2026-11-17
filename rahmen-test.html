@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Testseite für die Einbettung in die Projektzentrale. Enthält keine Daten, liegt nicht im Offline-Speicher (sw.js). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Rahmen-Test · TeamKit</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"Inter";src:url("fonts/inter-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-display:swap}
+:root{--bg:#eeeeec;--panel:#fff;--line:#e2e2df;--line2:#c8c8c3;--text:#111214;--muted:#62646a;--navy:#1c2a44;--navy-hell:#2c3e60;--ok:#2f6b52;--err:#b3261e}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Inter","Helvetica Neue",Helvetica,"Segoe UI",Arial,sans-serif;font-size:15px;line-height:1.5;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.leiste{position:fixed;top:0;left:0;right:0;height:52px;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:0 16px;overflow-x:auto}
+.leiste h1{margin:0 8px 0 0;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.knopf{height:36px;padding:0 14px;border:1px solid var(--text);background:#fff;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;white-space:nowrap}
+.knopf:hover{background:var(--text);color:#fff}
+.knopf.haupt{background:var(--navy);border-color:var(--navy);color:#fff}
+.knopf.haupt:hover{background:var(--navy-hell)}
+.leiste input{height:36px;width:200px;border:1px solid var(--line2);padding:0 10px;background:#fff;font-size:13px;border-radius:0}
+main{max-width:980px;margin:0 auto;padding:76px 16px 40px;display:flex;flex-direction:column;gap:20px}
+.karte{background:var(--panel);border:1px solid var(--line);padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+.karte h2{margin:0;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding-bottom:8px;border-bottom:1px solid var(--text)}
+.status{font-size:17px;font-weight:600}
+.status .ja{color:var(--ok)}.status .nein{color:var(--err)}
+ol{margin:0;padding-left:20px}
+.log{margin:0;padding:0;list-style:none;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;max-height:50vh;overflow:auto}
+.log li{padding:6px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.log time{color:var(--muted);margin-right:8px}
+.log .aus{color:var(--navy)}
+.klein{font-size:13px;color:var(--muted);margin:0}
+/* So wird die Projektzentrale TeamKit einbetten: fest unter der 52-px-Leiste, standardmäßig unsichtbar */
+#rahmen{position:fixed;top:52px;left:0;width:100%;height:calc(100vh - 52px);height:calc(100dvh - 52px);border:0;background:var(--bg);z-index:9}
+</style>
+</head>
+<body>
+<header class="leiste">
+  <h1>Rahmen-Test</h1>
+  <button class="knopf haupt" id="btnOeffnen" type="button">Öffnen</button>
+  <button class="knopf" id="btnProjekt" type="button">Öffnen mit Projekt 26.0527</button>
+  <button class="knopf" id="btnAus" type="button">Ausblenden</button>
+  <input id="beitragId" type="text" placeholder="Beitrags-ID (freiwillig)" aria-label="Beitrags-ID zum direkten Öffnen (freiwillig)" autocomplete="off">
+</header>
+<main>
+  <section class="karte">
+    <h2>So testen</h2>
+    <p class="ohne" style="margin:0">Zuerst in der Projektzentrale den Archivordner gewählt haben. Dann diese Seite neu laden und notieren:</p>
+    <ol>
+      <li>Steht ohne Klick „bereit: ja“?</li>
+      <li>Wenn nein: Öffnen → Zugriff erlauben im Rahmen – klappt das?</li>
+      <li>Nach Neuladen der Seite: wieder „bereit: ja“ ohne Klick?</li>
+    </ol>
+    <p class="klein">Mit <code>?probe=1</code> läuft TeamKit im Rahmen im Probe-Modus (ohne Ordner). Die Beitrags-ID oben öffnet einen „Gilt jetzt“-Beitrag direkt – die ID steht im Protokoll unter <code>schlagzeile.id</code>.</p>
+  </section>
+  <section class="karte">
+    <h2>Stand</h2>
+    <div class="status" id="status" role="status">TeamKit bereit: <span class="nein">noch keine Meldung</span></div>
+  </section>
+  <section class="karte">
+    <h2>Nachrichten</h2>
+    <ul class="log" id="log"></ul>
+  </section>
+</main>
+<iframe id="rahmen" title="TeamKit" hidden></iframe>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const rahmen = $('rahmen');
+rahmen.src = './?eingebettet=1' + (new URLSearchParams(location.search).has('probe') ? '&probe=1' : '');
+const zeit = () => new Date().toLocaleTimeString('de-DE');
+function eintrag(richtung, daten) {
+  const li = document.createElement('li'), t = document.createElement('time');
+  t.textContent = zeit() + (richtung === 'aus' ? ' →' : ' ←'); li.append(t, JSON.stringify(daten));
+  if (richtung === 'aus') li.className = 'aus';
+  $('log').prepend(li);
+}
+function schicke(o) { eintrag('aus', o); rahmen.contentWindow.postMessage(o, location.origin); }
+function oeffnen(projekt) {
+  rahmen.hidden = false; rahmen.focus();
+  const id = $('beitragId').value.trim();
+  schicke({ quelle: 'projektzentrale', art: 'oeffnen', ...(projekt ? { projekt } : {}), ...(id ? { id } : {}) });
+}
+function ausblenden(nachricht) { rahmen.hidden = true; if (nachricht) schicke({ quelle: 'projektzentrale', art: 'zu' }); $('btnOeffnen').focus(); }
+$('btnOeffnen').onclick = () => oeffnen('');
+$('btnProjekt').onclick = () => oeffnen('26.0527');
+$('btnAus').onclick = () => ausblenden(true);
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !rahmen.hidden) ausblenden(true); });
+window.addEventListener('message', ev => {
+  if (ev.origin !== location.origin || ev.source !== rahmen.contentWindow || !ev.data || ev.data.quelle !== 'teamkit') return;
+  const d = ev.data; eintrag('ein', d);
+  if (d.art === 'stand') {
+    const st = $('status'); st.textContent = 'TeamKit bereit: ';
+    const sp = document.createElement('span'); sp.className = d.bereit ? 'ja' : 'nein';
+    sp.textContent = d.bereit ? `ja · ${d.neuGilt} neu, ${d.heute} heute/morgen${d.morgenFaellig ? ', Guten Morgen fällig' : ''}` : `nein (${d.grund})`;
+    st.append(sp);
+  } else if (d.art === 'schliessen') ausblenden(false);
+});
+</script>
+</body>
+</html>
