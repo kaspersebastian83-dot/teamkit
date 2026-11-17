@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Kein Netz: connect-src 'self' (nur die eigenen App-Dateien für den Offline-Speicher), keine fremden Skripte -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>TeamKit · Spektron</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#17222c">
+<style>
+/* ===== SPEKTRON-LOOK v1 – gemeinsames Aussehen der Spektron-Apps (byte-gleich in jeder App; Prüfung: tests/leiste.cjs) =====
+   Nur Tokens (--sp-*) und allgemeine Bausteine, keine App-Farbe: jede App setzt --sp-app / --sp-app-dunkel AUSSERHALB dieses
+   Blocks auf ihre Farbe aus der Spektron-Leiste. Ändern nur hier und dann in alle Apps kopieren (wie MOSAIK-LEISTE). */
+:root{
+  --sp-bg:#f3f5f7; --sp-panel:#fff; --sp-panel2:#f7f9fb; --sp-line:#dfe6ec; --sp-line2:#b9c8d3; --sp-text:#17222c; --sp-muted:#5b6b78;
+  --sp-ok:#2e7d4f; --sp-err:#c0392b; --sp-gap:#fff3a6; --sp-pille:#e4c04a; --sp-app:#5b6b78; --sp-app-dunkel:#3f4b55;
+  --sp-font:"Segoe UI",system-ui,-apple-system,Arial,sans-serif; --sp-radius:14px; --sp-radius-k:10px;
+  --sp-h:44px; --sp-h-haupt:50px; --sp-h-gross:56px; --sp-schatten:0 1px 4px rgba(0,0,0,.08);
+}
+body{font-family:var(--sp-font);background:var(--sp-bg);color:var(--sp-text)}
+.sp-karte{background:var(--sp-panel);border-radius:var(--sp-radius);box-shadow:var(--sp-schatten)}
+.sp-knopf{height:var(--sp-h);padding:0 16px;border-radius:var(--sp-radius-k);border:1.5px solid var(--sp-line2);background:var(--sp-panel);color:var(--sp-text);font:inherit;font-size:15px;cursor:pointer}
+.sp-knopf:hover{border-color:var(--sp-app);color:var(--sp-text)}
+.sp-knopf-app{border-color:var(--sp-app-dunkel);background:var(--sp-app-dunkel);color:#fff;font-weight:700}
+.sp-knopf-app:hover{background:var(--sp-app);border-color:var(--sp-app-dunkel);color:#fff}
+.sp-haupt{height:var(--sp-h-haupt);padding:0 24px;border-radius:12px;border:0;background:var(--sp-app-dunkel);color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer}
+.sp-haupt:hover{background:var(--sp-app);color:#fff}
+.sp-knopf:focus-visible,.sp-haupt:focus-visible,.sp-kachel:focus-visible{outline:3px solid var(--sp-text);outline-offset:3px}
+/* Auswahl als Kacheln (z. B. BerichtKit „Welcher Bericht?“ / „Welche Form?“): Frage links, Kacheln, Notiz rechts */
+.sp-wahl{background:var(--sp-panel);border-radius:var(--sp-radius);box-shadow:var(--sp-schatten);padding:16px 20px 18px;display:flex;flex-direction:column;gap:12px}
+.sp-wahl-zeile{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.sp-wahl-frage{flex:none;width:150px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sp-muted)}
+.sp-wahl-kacheln{display:flex;gap:10px;flex-wrap:wrap}
+.sp-kachel{width:150px;min-height:64px;margin:0;padding:6px 8px;border-radius:var(--sp-radius-k);border:1.5px dashed var(--sp-line2);background:var(--sp-bg);color:var(--sp-text);font:inherit;font-size:14px;font-weight:600;line-height:1.2;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;opacity:1}
+.sp-kachel.flach{width:auto;min-width:150px;min-height:52px;padding:6px 18px}
+.sp-kachel:hover:not(:disabled):not([aria-pressed="true"]){border-style:solid;border-color:var(--sp-app);background:var(--sp-panel);color:var(--sp-text)}
+.sp-kachel[aria-pressed="true"]{border:1.5px solid var(--sp-panel);background:var(--sp-panel);box-shadow:0 0 0 3px var(--sp-app);font-weight:700;cursor:default}
+.sp-kachel:disabled{border-color:var(--sp-line);color:#8a9aa6;cursor:not-allowed;opacity:1}
+.sp-kachel svg{width:22px;height:22px;flex:none}
+.sp-kachel small{font-size:11.5px;font-weight:400;color:inherit}
+.sp-kachel .sp-tag{font-size:11px;font-weight:600;color:var(--sp-ok)}
+.sp-wahl-notiz{flex:1 1 200px;min-width:0;font-size:12.5px;color:var(--sp-muted)}
+.sp-wahl-notiz b.sp-ok{color:var(--sp-ok)}
+/* Rückfrage im Ablauf (statt Browser-Dialog): Satz + zwei Knöpfe */
+.sp-rueckfrage{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fdf0e6;border:1px solid #e3b58f;border-radius:var(--sp-radius-k);padding:10px 14px;font-size:13.5px}
+.sp-rueckfrage > span{flex:1 1 260px}
+.sp-rueckfrage .sp-knopf{height:38px;font-size:14px}
+/* Zähler offener Stellen als gelbe Pille */
+.sp-pille{display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 16px;border-radius:20px;border:0;background:var(--sp-pille);color:var(--sp-text);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+@media print{.sp-wahl,.sp-rueckfrage{display:none!important}}
+/* ===== Ende SPEKTRON-LOOK v1 ===== */
+</style>
+<style>
+:root{ --sp-app:#b5566e; --sp-app-dunkel:#93405a; --neu:#9a5527; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+button,input,textarea,select{font:inherit;color:inherit}
+a{color:var(--sp-app-dunkel)}
+.kopf{position:sticky;top:0;z-index:5;background:var(--sp-panel);border-bottom:1px solid var(--sp-line);display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding:6px 16px}
+.marke{font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}
+.marke i{width:22px;height:22px;border-radius:6px;background:var(--sp-app-dunkel);display:block}
+.tabs{display:flex;gap:16px}
+.tab{height:44px;padding:0 2px;border:0;border-bottom:3px solid transparent;background:none;font-weight:600;color:var(--sp-muted);display:flex;align-items:center;gap:6px;cursor:pointer}
+.tab[aria-selected="true"]{border-bottom-color:var(--sp-app-dunkel);color:var(--sp-text);font-weight:700}
+.zahl{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--neu);color:#fff}
+.frei{flex:1}
+.kopf select{height:44px;border-radius:var(--sp-radius-k);border:1.5px solid var(--sp-line2);background:var(--sp-panel);padding:0 8px;max-width:210px}
+.icon{width:44px;height:44px;border:0;background:none;border-radius:var(--sp-radius-k);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sp-text)}
+.icon:hover{background:var(--sp-panel2)}
+.icon svg,.sp-knopf svg{width:18px;height:18px;flex:none}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--sp-text);outline-offset:2px}
+main{max-width:780px;margin:0 auto;padding:14px 16px 40px;display:flex;flex-direction:column;gap:12px}
+.ein .marke,.ein #btnMehr{display:none}
+body:not(.ein) #btnZu{display:none}
+.zeile{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp-knopf{display:inline-flex;align-items:center;gap:6px}
+.chip{height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--sp-line2);background:var(--sp-panel);font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--sp-text);border-color:var(--sp-text);color:#fff;font-weight:600}
+.meldung{border-radius:var(--sp-radius-k);padding:10px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fdf0e6;border:1px solid #e3b58f}
+.meldung span{flex:1 1 240px}
+.meldung.err{background:#fbe9e7;border-color:#e0a59e}
+.meldung.info{background:#eef3f8;border-color:var(--sp-line2)}
+.karte{padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.karte h1,.karte h2{margin:0;font-size:19px}
+.karte p{margin:0}
+.post{background:var(--sp-panel);border:1px solid var(--sp-line);border-radius:var(--sp-radius-k);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.post.wichtig{background:#fff7dc;border-color:#e4c96a}
+.post h3{margin:0;font-size:15px;line-height:1.35}
+.post p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.marken{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;font-weight:700}
+.marke2{padding:2px 8px;border-radius:999px;font-weight:600}
+.b-Spektron{background:#e9edf9;color:#3a4c96}.b-Fachliches{background:#efe9f7;color:#5d4391}.b-Büro{background:#e4f1ee;color:#1f5c50}
+.m-neu{background:var(--neu);color:#fff;padding:2px 8px;border-radius:999px}
+.m-wichtig{color:#5c4400}
+.fuss{display:flex;gap:6px 12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:12.5px;color:var(--sp-muted)}
+.fuss .links{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.text-knopf{border:0;background:none;padding:0;min-height:32px;font-size:12.5px;font-weight:600;color:var(--sp-app-dunkel);cursor:pointer;text-decoration:underline}
+.leer{text-align:center;color:var(--sp-muted);padding:26px 10px}
+form.karte label,.feld{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600}
+input[type=text],input[type=date],textarea{border:1.5px solid var(--sp-line2);border-radius:var(--sp-radius-k);padding:9px 10px;background:var(--sp-panel);width:100%;font-weight:400;font-size:15px}
+input[type=text],input[type=date]{height:44px}
+.klein{font-size:12px;font-weight:400;color:var(--sp-muted)}
+.wahl{display:flex;gap:8px;flex-wrap:wrap}
+.wahl label{flex-direction:row;align-items:center;gap:6px;height:44px;padding:0 12px;border:1.5px solid var(--sp-line2);border-radius:var(--sp-radius-k);background:var(--sp-panel);font-weight:400;cursor:pointer}
+.wahl label:has(input:checked){border-color:var(--sp-app-dunkel);box-shadow:0 0 0 1.5px var(--sp-app-dunkel);font-weight:600}
+.haken{flex-direction:row!important;align-items:center;gap:8px!important;min-height:44px;font-weight:400!important;cursor:pointer}
+.fehler{color:var(--sp-err);font-size:13px;font-weight:600}
+.pinn{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;align-items:start}
+.zettel{border-radius:4px;box-shadow:0 2px 6px rgba(23,34,44,.2);padding:12px;display:flex;flex-direction:column;gap:8px;color:var(--sp-text)}
+.zettel p{margin:0;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}
+.zettel .fuss{color:#33414d}
+.zk{flex:1;height:44px;padding:0 8px;border-radius:8px;border:1px solid #5b6b78;background:rgba(255,255,255,.7);font-size:13px;font-weight:600;cursor:pointer}
+.zk[aria-pressed="true"]{background:var(--sp-text);border-color:var(--sp-text);color:#fff}
+.zk.rund{flex:none;border-radius:999px;padding:0 14px}
+.namen{font-size:12.5px;color:#26323c}
+.antwort{font-size:12.5px;background:rgba(255,255,255,.7);border-radius:6px;padding:6px 8px;overflow-wrap:anywhere}
+.zettel input[type=text]{height:40px;font-size:13.5px}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--sp-text);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;max-width:90vw;z-index:9}
+details.mehr{position:relative}
+details.mehr summary{list-style:none}
+details.mehr summary::-webkit-details-marker{display:none}
+details.mehr .menue{position:absolute;right:0;top:46px;background:var(--sp-panel);border:1px solid var(--sp-line2);border-radius:var(--sp-radius-k);box-shadow:0 8px 24px rgba(0,0,0,.14);padding:6px;display:flex;flex-direction:column;min-width:230px}
+details.mehr .menue button{height:44px;border:0;background:none;text-align:left;padding:0 10px;border-radius:8px;cursor:pointer}
+details.mehr .menue button:hover{background:var(--sp-panel2)}
+</style>
+</head>
+<body>
+<header class="kopf">
+  <span class="marke"><i aria-hidden="true"></i>TeamKit</span>
+  <div class="tabs" role="tablist" id="tabs" hidden>
+    <button class="tab" role="tab" id="tabNews" type="button" aria-selected="true" data-tab="news">Neuigkeiten <span class="zahl" id="zNews" hidden></span></button>
+    <button class="tab" role="tab" id="tabPinn" type="button" aria-selected="false" data-tab="pinn">Pinnwand <span class="zahl" id="zPinn" hidden></span></button>
+  </div>
+  <span class="frei"></span>
+  <select id="ich" aria-label="Wer bist du?" hidden></select>
+  <button class="icon" id="btnNeuLaden" type="button" aria-label="Neu laden" title="Neu laden" hidden><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
+  <details class="mehr" id="btnMehr"><summary class="icon" aria-label="Mehr"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></summary>
+    <div class="menue"><button type="button" id="mArchiv">Anderen Archivordner wählen …</button><button type="button" id="mUeber">Über TeamKit</button></div></details>
+  <button class="icon" id="btnZu" type="button" aria-label="Schließen" title="Schließen"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+</header>
+<main>
+  <div id="meldungen"></div>
+
+  <section id="zugang" class="sp-karte karte" hidden>
+    <h1 id="zugangTitel"></h1><p id="zugangText"></p>
+    <div class="zeile">
+      <button class="sp-knopf sp-knopf-app" id="btnErlauben" type="button" hidden>Zugriff erlauben</button>
+      <button class="sp-knopf sp-knopf-app" id="btnAnlegen" type="button" hidden>Ordner „_TeamKit“ anlegen</button>
+      <button class="sp-knopf" id="btnWaehlen" type="button">Archivordner wählen …</button>
+      <button class="sp-knopf" id="btnProbe" type="button">Nur ausprobieren</button>
+    </div>
+    <p class="klein">„Nur ausprobieren“ braucht keinen Ordner: Einträge bleiben dann allein in diesem Browser und sind für niemanden sonst sichtbar.</p>
+  </section>
+
+  <section id="news" hidden>
+    <div class="zeile" style="margin-bottom:12px">
+      <button class="sp-knopf sp-knopf-app" id="btnSchreiben" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Neuigkeit schreiben</button>
+      <span class="frei"></span>
+      <div class="zeile" id="filter" role="group" aria-label="Bereich"></div>
+    </div>
+    <div id="newsListe" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="leer"><button class="text-knopf" id="btnAeltere" type="button" hidden>Ältere Neuigkeiten anzeigen</button></div>
+  </section>
+
+  <form id="formular" class="sp-karte karte" hidden novalidate>
+    <h2 id="formTitel">Neuigkeit schreiben</h2>
+    <label>Überschrift<input type="text" id="fTitel" maxlength="120" autocomplete="off"></label>
+    <label>Text<textarea id="fText" rows="4" maxlength="600"></textarea><span class="klein">Kurz halten: zwei bis drei Sätze.</span></label>
+    <div class="feld" role="group" aria-labelledby="lBereich"><span id="lBereich">Bereich</span>
+      <div class="wahl"><label><input type="radio" name="bereich" value="Spektron" checked>Spektron</label><label><input type="radio" name="bereich" value="Fachliches">Fachliches</label><label><input type="radio" name="bereich" value="Büro">Büro</label></div></div>
+    <label>Link oder Dateipfad (freiwillig)<input type="text" id="fLink" maxlength="300" autocomplete="off"></label>
+    <label class="haken"><input type="checkbox" id="fWichtig">Wichtig – bleibt oben angeheftet</label>
+    <label style="max-width:220px">Anzeigen bis<input type="date" id="fBis"></label>
+    <span class="klein">Danach wandert die Neuigkeit zu den älteren.</span>
+    <div class="fehler" id="fFehler" role="alert"></div>
+    <div class="zeile"><span class="klein frei">Erscheint mit deinem Namen: <b id="fName" style="color:var(--sp-text)"></b></span>
+      <button class="sp-knopf" id="btnAbbrechen" type="button">Abbrechen</button><button class="sp-knopf sp-knopf-app" type="submit" id="btnSenden">Veröffentlichen</button></div>
+  </form>
+
+  <section id="pinn" hidden>
+    <form class="zeile" id="pinnForm" style="margin-bottom:6px" novalidate>
+      <input type="text" id="pText" maxlength="280" placeholder="Notiz anpinnen …" aria-label="Notiz anpinnen" autocomplete="off" style="flex:1 1 220px;width:auto">
+      <button class="sp-knopf" id="pUmfrage" type="button" aria-pressed="false" title="Mit zwei Knöpfen: Bin dabei / Diesmal nicht">Als Umfrage</button>
+      <button class="sp-knopf sp-knopf-app" type="submit">Anpinnen</button>
+    </form>
+    <div class="fehler" id="pFehler" role="alert" style="margin-bottom:8px"></div>
+    <div class="pinn" id="pinnListe"></div>
+    <p class="klein" style="margin-top:16px">Notizen stehen mit dem Namen des Schreibers da und verschwinden nach 14 Tagen von selbst.</p>
+  </section>
+
+  <section id="ueber" class="sp-karte karte" hidden>
+    <h2>TeamKit <span id="version" class="klein"></span></h2>
+    <p>Neuigkeiten und Pinnwand für das Büro. Alles liegt im Ordner <code>_TeamKit</code> im Archivordner – je Eintrag eine kleine Datei. Nichts verlässt das Büro; TeamKit liest sonst nur die Mitarbeiterliste und fasst keine Projektordner an.</p>
+    <ul id="aenderungen" class="klein" style="margin:0;padding-left:18px"></ul>
+    <div class="zeile"><button class="sp-knopf" id="btnUeberZu" type="button">Zurück</button></div>
+  </section>
+</main>
+<div id="toast" role="status" hidden></div>
+
+<script>
+'use strict';
+/* TeamKit – Neuigkeiten und Pinnwand. Schreibt ausschließlich nach <Archivordner>/_TeamKit:
+   e-<JJJJMMTT>-<zufall>.json   ein Eintrag (Neuigkeit oder Notiz); nur der Schreiber ändert seine Datei
+   r-<JJJJMMTT>-<zufall>~<Kürzel>.json   Reaktion einer Person auf einen Eintrag (Umfrage, Danke, Antworten)
+   Je Person und Eintrag eine eigene Datei – zwei Leute schreiben nie in dieselbe Datei. */
+const APP_VERSION = '0.1.0';
+const AENDERUNGEN = [
+  ['0.1.0', '17.11.2026', 'Erste Fassung: Neuigkeiten (Bereich, Wichtig, Anzeigen bis) und Pinnwand (Notizen, Umfragen, Danke, Antworten), gemeinsamer Ordner „_TeamKit“, Name des Schreibers automatisch, Probe-Modus ohne Ordner.'],
+];
+const TK_ORDNER = '_TeamKit', MA_FILE = '_Spektron-Mitarbeiter.json', ICH_KEY = 'spektron-ich';
+const NOTIZ_TAGE = 14, NEWS_TAGE = 60, MAX_BYTES = 20000;
+const BEREICHE = ['Spektron', 'Fachliches', 'Büro'], FARBEN = ['#fff0a8', '#d9f0df', '#dde8fb', '#fbe0e8', '#fde3c8'];
+const EIN = new URLSearchParams(location.search).has('eingebettet');
+const $ = id => document.getElementById(id);
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const lokal = {
+  get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ohne Speicher */ } },
+};
+/* gemeinsamer Browser-Speicher der Suite: DB „mosaik-suite“, Speicher „kv“. „archiv“ legt die Projektzentrale ab – TeamKit liest es nur. */
+const SUITE = {
+  db: null,
+  open() { return this.db || (this.db = new Promise((res, rej) => { const r = indexedDB.open('mosaik-suite', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); },
+  async get(k) { const db = await this.open(); return new Promise((res, rej) => { const r = db.transaction('kv').objectStore('kv').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  async set(k, v) { const db = await this.open(); return new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(true); t.onerror = () => rej(t.error); }); },
+};
+const S = {
+  archiv: null, tk: null, schreiben: false, probe: false,
+  personen: [], eintraege: [], reakt: new Map(),   // reakt: Eintrags-ID → [Reaktionen]
+  cache: new Map(),                                 // Dateiname → { mod, daten }
+  tab: 'news', filter: '', aeltere: false, bearbeite: null, umfrage: false,
+  neuAb: { news: '', pinn: '' }, antwortOffen: '', loeschFrage: '', meldungen: [],
+};
+
+/* ---------- kleine Helfer ---------- */
+const pad = n => String(n).padStart(2, '0');
+const tagStr = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+const isoTag = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const vorTagen = n => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - n); return d; };
+const sicher = k => String(k).normalize('NFC').replace(/[^A-Za-z0-9ÄÖÜäöüß]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 24) || 'x';
+function wann(iso) {
+  const d = new Date(iso); if (isNaN(d)) return '';
+  const zeit = `${pad(d.getHours())}:${pad(d.getMinutes())}`, t = tagStr(d);
+  if (t === tagStr(new Date())) return 'heute, ' + zeit;
+  if (t === tagStr(vorTagen(1))) return 'gestern, ' + zeit;
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.` + (d.getFullYear() !== new Date().getFullYear() ? d.getFullYear() : '');
+}
+let toastZeit = 0;
+function toast(text, ms) { const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(toastZeit); toastZeit = setTimeout(() => { t.hidden = true; }, ms || 5000); }
+function meldung(art, text, id, knopf) {
+  S.meldungen = S.meldungen.filter(m => m.id !== id);
+  if (text) S.meldungen.push({ art, text, id, knopf });
+  $('meldungen').innerHTML = S.meldungen.map(m => `<div class="meldung ${m.art}" style="margin-bottom:8px"><span>${m.text}</span>${m.knopf ? `<button class="sp-knopf" type="button" data-aktion="${m.knopf[0]}">${esc(m.knopf[1])}</button>` : ''}</div>`).join('');
+}
+
+/* ---------- Wer bin ich ---------- */
+function ich() {
+  if (S.personen.length) { const k = lokal.get(ICH_KEY), p = S.personen.find(x => x.ordnerKuerzel === k); return p ? { kuerzel: p.ordnerKuerzel, name: p.name || p.ordnerKuerzel } : null; }
+  const n = lokal.get('teamkit-name').trim(); return n ? { kuerzel: sicher(n), name: n } : null;
+}
+function ichZeigen() {
+  const sel = $('ich'), k = lokal.get(ICH_KEY);
+  if (!S.personen.length) { sel.hidden = true; return; }
+  sel.innerHTML = '<option value="">Ich bin …</option>' + S.personen.filter(p => p.aktiv !== false || p.ordnerKuerzel === k).map(p => `<option value="${esc(p.ordnerKuerzel)}"${p.ordnerKuerzel === k ? ' selected' : ''}>${esc(p.name || p.ordnerKuerzel)}</option>`).join('');
+  sel.hidden = false;
+}
+/** Ohne Namen wird nichts geschrieben. Gibt die Person zurück oder null (dann steht eine Meldung da). */
+function ichOderFrage() {
+  const p = ich(); if (p) return p;
+  if (S.personen.length) { toast('Bitte oben bei „Ich bin …“ deinen Namen wählen.'); $('ich').focus(); return null; }
+  meldung('info', 'Wie heißt du? <input type="text" id="nameFrei" maxlength="40" style="max-width:220px" aria-label="Dein Name">', 'name', ['name', 'Übernehmen']);
+  const f = $('nameFrei'); if (f) f.focus();
+  return null;
+}
+async function personenLaden() {
+  S.personen = [];
+  if (S.probe) return;
+  try {
+    const o = JSON.parse(await (await (await S.archiv.getFileHandle(MA_FILE)).getFile()).text());
+    if (o && o.format === 'spektron-mitarbeiter' && Array.isArray(o.personen)) S.personen = o.personen.filter(p => p && typeof p.ordnerKuerzel === 'string' && p.ordnerKuerzel.trim() && typeof p.name === 'string');
+  } catch (e) { /* keine Liste: Name frei eingeben */ }
+}
+
+/* ---------- Zugang ---------- */
+function ansicht(id) {
+  for (const x of ['zugang', 'news', 'formular', 'pinn', 'ueber']) $(x).hidden = x !== id;
+  const drin = id !== 'zugang';
+  $('tabs').hidden = !drin || !S.tk; $('btnNeuLaden').hidden = !S.tk || !drin;
+  $('btnMehr').open = false;
+}
+function zugang(titel, text, opt) {
+  opt = opt || {};
+  $('zugangTitel').textContent = titel; $('zugangText').innerHTML = text;
+  $('btnErlauben').hidden = !opt.erlauben; $('btnAnlegen').hidden = !opt.anlegen; $('btnWaehlen').hidden = !!opt.keinWaehlen;
+  $('ich').hidden = true; ansicht('zugang');
+}
+async function erlaubt(h, mode, fragen) {
+  try { if ((await h.queryPermission({ mode })) === 'granted') return true; return fragen ? (await h.requestPermission({ mode })) === 'granted' : false; } catch (e) { return !!S.probe; }
+}
+async function start() {
+  $('version').textContent = 'v' + APP_VERSION;
+  $('aenderungen').innerHTML = AENDERUNGEN.map(a => `<li><b>${esc(a[0])}</b> (${esc(a[1])}): ${esc(a[2])}</li>`).join('');
+  if (EIN) document.body.classList.add('ein');
+  S.neuAb.news = lokal.get('teamkit-gesehen-news'); S.neuAb.pinn = lokal.get('teamkit-gesehen-pinn');
+  if (/^https?:$/.test(location.protocol) && location.hostname !== '127.0.0.1' && 'serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+  if (new URLSearchParams(location.search).has('probe')) return probeStart();
+  if (!('showDirectoryPicker' in window)) { zugang('Bitte Edge oder Chrome benutzen', 'TeamKit braucht den Zugriff auf Ordner, den nur Edge und Chrome haben.', { keinWaehlen: true }); return; }
+  let h = null;
+  try { h = await SUITE.get('teamkit-archiv') || await SUITE.get('archiv'); } catch (e) { h = null; }
+  if (!h) { zugang('Archivordner wählen', 'Wähle einmal den Ordner, in dem alle Projektordner liegen – im Büro <code>C:\\Daten\\Mosaik Archivordner</code>. Hast du ihn schon in der Projektzentrale gewählt, öffne TeamKit am besten einmal von dort.'); return; }
+  S.archiv = h; await verbinden(false);
+}
+async function probeStart() {
+  try { S.archiv = await navigator.storage.getDirectory(); } catch (e) { zugang('Ausprobieren geht hier nicht', 'Dieser Browser erlaubt keinen eigenen Speicher für die Probe.'); return; }
+  S.probe = true; S.tk = await S.archiv.getDirectoryHandle(TK_ORDNER, { create: true }); S.schreiben = true;
+  meldung('info', 'Probe-Modus: Einträge bleiben nur in diesem Browser und sind für niemanden sonst sichtbar.', 'probe');
+  await personenLaden(); ichZeigen(); await laden(); zeigeTab(S.tab);
+}
+async function verbinden(fragen) {
+  S.tk = null; S.probe = false; meldung('', '', 'probe');
+  if (!(await erlaubt(S.archiv, 'read', fragen))) { zugang('Zugriff auf den Archivordner', `TeamKit darf den Archivordner „${esc(S.archiv.name)}“ gerade nicht lesen. Der Browser fragt einmal nach.`, { erlauben: true }); return; }
+  try { S.tk = await S.archiv.getDirectoryHandle(TK_ORDNER); }
+  catch (e) { zugang('Ordner „_TeamKit“ fehlt', `Im Archivordner „${esc(S.archiv.name)}“ gibt es noch keinen Ordner <code>_TeamKit</code>. Dort liegen später alle Neuigkeiten und Notizen. Das Anlegen ist einmal nötig.`, { anlegen: true }); return; }
+  S.schreiben = await erlaubt(S.tk, 'readwrite', fragen);
+  meldung('warn', S.schreiben ? '' : 'TeamKit darf noch nicht in <code>_TeamKit</code> schreiben. Lesen geht, Schreiben erst nach deiner Erlaubnis.', 'schreiben', ['schreiben', 'Schreiben erlauben']);
+  await personenLaden(); ichZeigen(); await laden(); zeigeTab(S.tab);
+}
+async function archivWaehlen() {
+  let h; try { h = await window.showDirectoryPicker({ id: 'teamkit-archiv', mode: 'read' }); } catch (e) { return; }
+  if (/^_TeamKit$/i.test(h.name) || /^\d\d\.\d{4}\b/.test(h.name)) { toast(`„${h.name}“ ist ein Unterordner. Bitte den Archivordner wählen, in dem alle Projektordner liegen.`); return; }
+  S.archiv = h; await SUITE.set('teamkit-archiv', h).catch(() => {}); S.cache.clear(); await verbinden(true);
+}
+async function ordnerAnlegen() {
+  if (!(await erlaubt(S.archiv, 'readwrite', true))) { toast('Ohne Schreib-Erlaubnis lässt sich der Ordner nicht anlegen.'); return; }
+  try { await S.archiv.getDirectoryHandle(TK_ORDNER, { create: true }); } catch (e) { toast('Der Ordner ließ sich nicht anlegen: ' + (e.message || e.name)); return; }
+  await verbinden(true);
+}
+
+/* ---------- Lesen ---------- */
+const E_RE = /^e-(\d{8})-([a-z0-9]{6,12})\.json$/, R_RE = /^r-(\d{8})-([a-z0-9]{6,12})~(.{1,24})\.json$/;
+function pruefeEintrag(o, id) {
+  if (!o || o.format !== 'teamkit-eintrag' || o.id !== id || !o.von || typeof o.von.name !== 'string' || typeof o.am !== 'string') return null;
+  if (o.art !== 'news' && o.art !== 'notiz') return null;
+  return { id, art: o.art, titel: String(o.titel || '').slice(0, 120), text: String(o.text || '').slice(0, 600), bereich: BEREICHE.includes(o.bereich) ? o.bereich : 'Büro',
+    link: String(o.link || '').slice(0, 300), wichtig: o.wichtig === true, bis: /^\d{4}-\d\d-\d\d$/.test(o.bis) ? o.bis : '', umfrage: o.umfrage === true,
+    von: { kuerzel: String(o.von.kuerzel || ''), name: o.von.name.slice(0, 60) }, am: o.am, geaendert: typeof o.geaendert === 'string' ? o.geaendert : '', weg: o.geloescht === true };
+}
+function pruefeReaktion(o, id) {
+  if (!o || o.format !== 'teamkit-reaktion' || o.zu !== id || !o.von || typeof o.von.name !== 'string') return null;
+  return { zu: id, von: { kuerzel: String(o.von.kuerzel || ''), name: o.von.name.slice(0, 60) }, wahl: o.wahl === 'ja' || o.wahl === 'nein' ? o.wahl : '', danke: o.danke === true,
+    texte: (Array.isArray(o.texte) ? o.texte : []).filter(t => t && typeof t.text === 'string' && typeof t.am === 'string').slice(0, 20).map(t => ({ text: t.text.slice(0, 200), am: t.am })) };
+}
+async function lies(name, h) {
+  const f = await h.getFile(), alt = S.cache.get(name);
+  if (alt && alt.mod === f.lastModified && alt.size === f.size) return alt.daten;
+  let daten = null;
+  if (f.size <= MAX_BYTES) { try { daten = JSON.parse(await f.text()); } catch (e) { daten = null; } }
+  S.cache.set(name, { mod: f.lastModified, size: f.size, daten }); return daten;
+}
+let ladeNr = 0;
+/** Ordner durchgehen: nur Dateinamen der letzten Wochen werden geöffnet (ältere erst mit „Ältere anzeigen“). */
+async function laden() {
+  if (!S.tk) return false;
+  const nr = ++ladeNr, ab = S.aeltere ? '00000000' : tagStr(vorTagen(NEWS_TAGE + 31)), eintraege = [], reakt = new Map(), rDateien = [];
+  try {
+    for await (const [name, h] of S.tk.entries()) {
+      if (h.kind !== 'file') continue;
+      let m = E_RE.exec(name);
+      if (m) { if (m[1] >= ab) { const e = pruefeEintrag(await lies(name, h), m[1] + '-' + m[2]); if (e && !e.weg) eintraege.push(e); } continue; }
+      m = R_RE.exec(name); if (m && m[1] >= ab) rDateien.push([name, h, m[1] + '-' + m[2]]);
+    }
+    const da = new Set(eintraege.map(e => e.id));
+    for (const [name, h, id] of rDateien) { if (!da.has(id)) continue; const r = pruefeReaktion(await lies(name, h), id); if (r) { if (!reakt.has(id)) reakt.set(id, []); reakt.get(id).push(r); } }
+  } catch (e) { meldung('err', 'Der Ordner <code>_TeamKit</code> ließ sich gerade nicht lesen (' + esc(e.message || e.name) + ').', 'lesen', ['neuladen', 'Noch einmal']); return false; }
+  if (nr !== ladeNr) return false;
+  meldung('', '', 'lesen');
+  const neu = JSON.stringify([eintraege, [...reakt]]), geaendert = neu !== S.stand;
+  S.stand = neu; S.eintraege = eintraege.sort((a, b) => b.am.localeCompare(a.am)); S.reakt = reakt;
+  zaehler(); return geaendert;
+}
+const abgelaufen = e => e.art === 'news' ? ((e.bis && e.bis < isoTag(new Date())) || (!e.bis && e.am < vorTagen(NEWS_TAGE).toISOString())) : e.am < vorTagen(NOTIZ_TAGE).toISOString();
+const istNeu = (e, tab) => { const p = ich(); return e.am > (S.neuAb[tab] || '') && !(p && p.kuerzel === e.von.kuerzel) && !abgelaufen(e); };
+function zaehler() {
+  const n = S.eintraege.filter(e => e.art === 'news' && istNeu(e, 'news')), p = S.eintraege.filter(e => e.art === 'notiz' && istNeu(e, 'pinn'));
+  $('zNews').textContent = n.length; $('zNews').hidden = !n.length; $('zPinn').textContent = p.length; $('zPinn').hidden = !p.length;
+  /* Für eine Projektzentrale, die TeamKit einbettet: Stand melden (nur an dieselbe Adresse). */
+  if (window.parent !== window) { const s = n.find(e => e.wichtig) || n[0]; try { window.parent.postMessage({ quelle: 'teamkit', art: 'stand', neuNews: n.length, neuPinn: p.length, schlagzeile: s ? { titel: s.titel, von: s.von.name, am: s.am } : null }, location.origin); } catch (e) { /* fremder Rahmen */ } }
+}
+
+/* ---------- Schreiben (einzige Stellen) ---------- */
+async function schreibe(name, obj) {
+  if (!S.schreiben || !S.tk) throw new Error('Schreiben in _TeamKit ist nicht erlaubt');
+  const text = JSON.stringify(obj, null, 1) + '\n';
+  const fh = await S.tk.getFileHandle(name, { create: true }), w = await fh.createWritable();
+  await w.write(text); await w.close();
+  if (await (await fh.getFile()).text() !== text) throw new Error('Kontrolle nach dem Speichern fehlgeschlagen');
+  S.cache.delete(name);
+}
+const zufall = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), b => 'abcdefghijklmnopqrstuvwxyz0123456789'[b % 36]).join('');
+async function eintragSpeichern(daten, alt) {
+  const p = ichOderFrage(); if (!p) return false;
+  if (!S.schreiben) { toast('TeamKit darf gerade nicht schreiben – bitte oben „Schreiben erlauben“.'); return false; }
+  const jetzt = new Date(), id = alt ? alt.id : tagStr(jetzt) + '-' + zufall();
+  const o = { format: 'teamkit-eintrag', version: 1, id, ...daten, von: alt ? alt.von : p, am: alt ? alt.am : jetzt.toISOString(), geschriebenMit: 'TeamKit ' + APP_VERSION };
+  if (alt) o.geaendert = jetzt.toISOString();
+  try { await schreibe('e-' + id + '.json', o); } catch (e) { toast('Nicht gespeichert: ' + (e.message || e.name)); return false; }
+  await laden(); return true;
+}
+async function reaktionSpeichern(id, aendern) {
+  const p = ichOderFrage(); if (!p) return;
+  if (!S.schreiben) { toast('TeamKit darf gerade nicht schreiben – bitte oben „Schreiben erlauben“.'); return; }
+  const alt = (S.reakt.get(id) || []).find(r => r.von.kuerzel === p.kuerzel) || { wahl: '', danke: false, texte: [] };
+  const o = { format: 'teamkit-reaktion', version: 1, zu: id, von: p, wahl: alt.wahl, danke: alt.danke, texte: alt.texte.slice(), am: new Date().toISOString() };
+  aendern(o);
+  try { await schreibe('r-' + id + '~' + sicher(p.kuerzel) + '.json', o); } catch (e) { toast('Nicht gespeichert: ' + (e.message || e.name)); return; }
+  await laden(); render();
+}
+
+/* ---------- Anzeige ---------- */
+function zeigeTab(tab) {
+  S.tab = tab; S.bearbeite = null;
+  $('tabNews').setAttribute('aria-selected', String(tab === 'news')); $('tabPinn').setAttribute('aria-selected', String(tab === 'pinn'));
+  ansicht(tab); render();
+  /* „Neu“ bleibt in dieser Ansicht stehen, der Zähler ist danach erledigt */
+  const key = tab === 'news' ? 'teamkit-gesehen-news' : 'teamkit-gesehen-pinn', jetzt = new Date().toISOString();
+  lokal.set(key, jetzt); const vorher = S.neuAb[tab]; S.neuAb[tab] = jetzt; zaehler(); S.neuAbAnzeige = { ...(S.neuAbAnzeige || {}), [tab]: vorher };
+}
+const neuInAnzeige = (e, tab) => { const p = ich(); return e.am > ((S.neuAbAnzeige || {})[tab] || '') && !(p && p.kuerzel === e.von.kuerzel); };
+const meins = e => { const p = ich(); return !!p && p.kuerzel === e.von.kuerzel; };
+function linkHtml(l) {
+  if (!l) return '';
+  if (/^https?:\/\//i.test(l)) return `<a href="${esc(l)}" target="_blank" rel="noopener noreferrer">${esc(l.replace(/^https?:\/\//i, '').slice(0, 48))}</a>`;
+  return `<span>${esc(l)}</span> <button class="text-knopf" type="button" data-aktion="kopieren" data-wert="${esc(l)}">Pfad kopieren</button>`;
+}
+function loeschHtml(e, wort) {
+  if (S.loeschFrage !== e.id) return `<button class="text-knopf" type="button" data-aktion="loeschen" data-id="${e.id}">${wort}</button>`;
+  return `<span>Wirklich? <button class="text-knopf" type="button" data-aktion="loeschen-ja" data-id="${e.id}">Ja, ${wort.toLowerCase()}</button> · <button class="text-knopf" type="button" data-aktion="loeschen-nein">Nein</button></span>`;
+}
+function renderNews() {
+  $('filter').innerHTML = ['', ...BEREICHE].map(b => `<button class="chip" type="button" aria-pressed="${S.filter === b}" data-aktion="filter" data-wert="${b}">${b || 'Alle'}</button>`).join('');
+  let liste = S.eintraege.filter(e => e.art === 'news' && (!S.filter || e.bereich === S.filter));
+  const alt = liste.filter(abgelaufen); liste = liste.filter(e => !abgelaufen(e));
+  liste.sort((a, b) => (b.wichtig - a.wichtig) || b.am.localeCompare(a.am));
+  if (S.aeltere) liste = liste.concat(alt);
+  const post = e => `<article class="post${e.wichtig && !abgelaufen(e) ? ' wichtig' : ''}">
+    <div class="marken"><span class="marke2 b-${e.bereich}">${e.bereich}</span>${e.wichtig && !abgelaufen(e) ? '<span class="m-wichtig">Wichtig</span>' : ''}${neuInAnzeige(e, 'news') && !abgelaufen(e) ? '<span class="m-neu">Neu</span>' : ''}</div>
+    <h3>${esc(e.titel)}</h3>${e.text ? `<p>${esc(e.text)}</p>` : ''}${e.link ? `<div class="klein">${linkHtml(e.link)}</div>` : ''}
+    <div class="fuss"><span>${esc(e.von.name)} · ${wann(e.am)}${e.geaendert ? ' · geändert' : ''}</span>
+    <span class="links">${meins(e) ? `<button class="text-knopf" type="button" data-aktion="bearbeiten" data-id="${e.id}">Bearbeiten</button>${loeschHtml(e, 'Löschen')}` : ''}</span></div></article>`;
+  $('newsListe').innerHTML = liste.length ? liste.map(post).join('') : `<div class="leer">${S.filter ? 'In diesem Bereich steht gerade nichts.' : 'Noch keine Neuigkeiten. Schreib die erste.'}</div>`;
+  $('btnAeltere').hidden = S.aeltere;
+}
+function renderPinn() {
+  const p = ich(), liste = S.eintraege.filter(e => e.art === 'notiz' && !abgelaufen(e));
+  const zettel = e => {
+    const r = S.reakt.get(e.id) || [], mein = p ? r.find(x => x.von.kuerzel === p.kuerzel) : null;
+    const ja = r.filter(x => x.wahl === 'ja'), nein = r.filter(x => x.wahl === 'nein'), danke = r.filter(x => x.danke).length;
+    const namen = l => l.map(x => esc(p && x.von.kuerzel === p.kuerzel ? 'du' : x.von.name.split(' ').filter(w => !/^Dr\.?$/.test(w))[0] || x.von.name)).join(', ');
+    const antworten = r.flatMap(x => x.texte.map(t => ({ ...t, name: x.von.name }))).sort((a, b) => a.am.localeCompare(b.am));
+    const farbe = FARBEN[[...e.id].reduce((s, c) => s + c.charCodeAt(0), 0) % FARBEN.length];
+    return `<article class="zettel" style="background:${farbe}">
+      ${neuInAnzeige(e, 'pinn') ? '<div class="marken"><span class="m-neu">Neu</span></div>' : ''}<p>${esc(e.text)}</p>
+      ${e.umfrage ? `<div class="zeile" style="gap:6px"><button class="zk" type="button" aria-pressed="${!!mein && mein.wahl === 'ja'}" data-aktion="wahl" data-wert="ja" data-id="${e.id}">Bin dabei</button><button class="zk" type="button" aria-pressed="${!!mein && mein.wahl === 'nein'}" data-aktion="wahl" data-wert="nein" data-id="${e.id}">Diesmal nicht</button></div>
+        ${ja.length ? `<div class="namen"><b>Dabei (${ja.length}):</b> ${namen(ja)}</div>` : ''}${nein.length ? `<div class="namen"><b>Nicht dabei (${nein.length}):</b> ${namen(nein)}</div>` : ''}` : ''}
+      ${antworten.map(a => `<div class="antwort">${esc(a.text)} <b>${esc(a.name)}</b></div>`).join('')}
+      ${S.antwortOffen === e.id ? `<form class="zeile" data-antwort="${e.id}" style="gap:6px" novalidate><input type="text" maxlength="200" aria-label="Antwort" placeholder="Antwort …" style="flex:1 1 120px;width:auto"><button class="zk rund" type="submit" style="height:40px">Senden</button></form>` : ''}
+      <div class="zeile" style="gap:10px">${e.umfrage ? '' : `<button class="zk rund" type="button" aria-pressed="${!!mein && mein.danke}" data-aktion="danke" data-id="${e.id}">Danke!${danke ? ' · ' + danke : ''}</button>`}
+        ${S.antwortOffen === e.id ? '' : `<button class="text-knopf" type="button" data-aktion="antworten" data-id="${e.id}">Antworten</button>`}${meins(e) ? loeschHtml(e, 'Abnehmen') : ''}</div>
+      <div class="fuss"><span>${esc(e.von.name)} · ${wann(e.am)}</span></div></article>`;
+  };
+  $('pinnListe').innerHTML = liste.length ? liste.map(zettel).join('') : '<div class="leer" style="grid-column:1/-1">Die Pinnwand ist leer. Häng die erste Notiz auf.</div>';
+  const f = document.querySelector('form[data-antwort] input'); if (f) f.focus();
+}
+function render() { if (S.tab === 'news' && !$('news').hidden) renderNews(); if (S.tab === 'pinn' && !$('pinn').hidden) renderPinn(); }
+
+/* ---------- Formular Neuigkeit ---------- */
+function formularAuf(e) {
+  const p = ichOderFrage(); if (!p) return;
+  S.bearbeite = e || null;
+  $('formTitel').textContent = e ? 'Neuigkeit bearbeiten' : 'Neuigkeit schreiben'; $('btnSenden').textContent = e ? 'Speichern' : 'Veröffentlichen';
+  $('fTitel').value = e ? e.titel : ''; $('fText').value = e ? e.text : ''; $('fLink').value = e ? e.link : ''; $('fWichtig').checked = e ? e.wichtig : false;
+  const bis = new Date(); bis.setDate(bis.getDate() + 30); $('fBis').value = e ? e.bis : isoTag(bis);
+  for (const r of document.getElementsByName('bereich')) r.checked = r.value === (e ? e.bereich : 'Spektron');
+  $('fName').textContent = e ? e.von.name : p.name; $('fFehler').textContent = '';
+  ansicht('formular'); $('fTitel').focus();
+}
+$('formular').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const titel = $('fTitel').value.trim();
+  if (!titel) { $('fFehler').textContent = 'Bitte eine Überschrift eintragen.'; $('fTitel').focus(); return; }
+  $('btnSenden').disabled = true;
+  const ok = await eintragSpeichern({ art: 'news', titel, text: $('fText').value.trim(), bereich: [...document.getElementsByName('bereich')].find(r => r.checked).value, link: $('fLink').value.trim(), wichtig: $('fWichtig').checked, bis: $('fBis').value || '' }, S.bearbeite);
+  $('btnSenden').disabled = false;
+  if (ok) { toast(S.bearbeite ? 'Gespeichert.' : 'Veröffentlicht.'); zeigeTab('news'); }
+});
+$('btnAbbrechen').onclick = () => zeigeTab('news');
+$('btnSchreiben').onclick = () => formularAuf(null);
+
+/* ---------- Pinnwand ---------- */
+$('pUmfrage').onclick = () => { S.umfrage = !S.umfrage; $('pUmfrage').setAttribute('aria-pressed', String(S.umfrage)); $('pText').placeholder = S.umfrage ? 'Frage an alle, z. B. „Frühstück morgen – wer ist dabei?“' : 'Notiz anpinnen …'; $('pText').focus(); };
+$('pinnForm').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const text = $('pText').value.trim(); $('pFehler').textContent = '';
+  if (!text) { $('pFehler').textContent = 'Bitte erst etwas schreiben.'; $('pText').focus(); return; }
+  if (await eintragSpeichern({ art: 'notiz', text, umfrage: S.umfrage })) { $('pText').value = ''; if (S.umfrage) $('pUmfrage').click(); render(); }
+});
+
+/* ---------- Klicks ---------- */
+document.addEventListener('click', async ev => {
+  const k = ev.target.closest('[data-aktion]'); if (!k) return;
+  const a = k.dataset.aktion, id = k.dataset.id, e = id ? S.eintraege.find(x => x.id === id) : null;
+  if (a === 'filter') { S.filter = k.dataset.wert; renderNews(); }
+  else if (a === 'kopieren') { try { await navigator.clipboard.writeText(k.dataset.wert); toast('Pfad kopiert.'); } catch (x) { toast('Kopieren ging nicht – bitte von Hand markieren.'); } }
+  else if (a === 'bearbeiten' && e) formularAuf(e);
+  else if (a === 'loeschen') { S.loeschFrage = id; render(); }
+  else if (a === 'loeschen-nein') { S.loeschFrage = ''; render(); }
+  else if (a === 'loeschen-ja' && e && meins(e)) {
+    S.loeschFrage = '';
+    const { id: _i, von: _v, am: _a, weg: _w, geaendert: _g, ...rest } = e;
+    if (await eintragSpeichern({ ...rest, geloescht: true }, e)) toast(e.art === 'news' ? 'Gelöscht.' : 'Abgenommen.');
+    render();
+  }
+  else if (a === 'wahl' && e) reaktionSpeichern(id, o => { o.wahl = o.wahl === k.dataset.wert ? '' : k.dataset.wert; });
+  else if (a === 'danke' && e) reaktionSpeichern(id, o => { o.danke = !o.danke; });
+  else if (a === 'antworten') { if (ichOderFrage()) { S.antwortOffen = id; renderPinn(); } }
+  else if (a === 'schreiben') { S.schreiben = await erlaubt(S.tk, 'readwrite', true); meldung('warn', S.schreiben ? '' : 'Ohne Erlaubnis kann TeamKit nur lesen.', 'schreiben', ['schreiben', 'Schreiben erlauben']); }
+  else if (a === 'neuladen') { await laden(); render(); }
+  else if (a === 'name') { const n = ($('nameFrei') || {}).value || ''; if (n.trim()) { lokal.set('teamkit-name', n.trim().slice(0, 40)); meldung('', '', 'name'); toast('Danke, ' + n.trim() + '. Jetzt noch einmal senden.'); } }
+});
+document.addEventListener('submit', ev => {
+  const f = ev.target.closest('form[data-antwort]'); if (!f) return;
+  ev.preventDefault();
+  const text = f.querySelector('input').value.trim(), id = f.dataset.antwort; if (!text) return;
+  S.antwortOffen = ''; reaktionSpeichern(id, o => { o.texte.push({ text: text.slice(0, 200), am: new Date().toISOString() }); });
+});
+$('tabs').addEventListener('click', ev => { const t = ev.target.closest('[data-tab]'); if (t) zeigeTab(t.dataset.tab); });
+$('ich').onchange = () => { lokal.set(ICH_KEY, $('ich').value); zaehler(); render(); };
+$('btnErlauben').onclick = () => verbinden(true);
+$('btnAnlegen').onclick = ordnerAnlegen;
+$('btnWaehlen').onclick = archivWaehlen;
+$('btnProbe').onclick = probeStart;
+$('mArchiv').onclick = () => { $('btnMehr').open = false; if ('showDirectoryPicker' in window) archivWaehlen(); else toast('Das geht nur in Edge oder Chrome.'); };
+$('mUeber').onclick = () => ansicht('ueber');
+$('btnUeberZu').onclick = () => S.tk ? zeigeTab(S.tab) : ansicht('zugang');
+$('btnAeltere').onclick = async () => { S.aeltere = true; S.cache.clear(); await laden(); renderNews(); };
+$('btnNeuLaden').onclick = async () => { await laden(); render(); toast('Aktuell.', 1500); };
+$('btnZu').onclick = () => { try { window.parent.postMessage({ quelle: 'teamkit', art: 'schliessen' }, location.origin); } catch (e) { /* fremder Rahmen */ } };
+
+/* Alle 60 s und beim Zurückkommen nachsehen – aber nie, während jemand tippt */
+async function nachsehen() {
+  if (!S.tk || document.hidden || !$('formular').hidden) return;
+  const el = document.activeElement, tippt = el && /^(INPUT|TEXTAREA)$/.test(el.tagName) && el.value;
+  if (await laden() && !tippt) render();
+}
+setInterval(nachsehen, 60000);
+document.addEventListener('visibilitychange', nachsehen);
+start();
+</script>
+</body>
+</html>
