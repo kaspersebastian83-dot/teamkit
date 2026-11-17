@@ -126,6 +126,31 @@ main{max-width:1320px;margin:0 auto;padding:var(--abstand) 24px 56px;display:fle
 .spalte.eng{gap:8px}
 .spalte.gilt{background:var(--sp-panel);border:1px solid var(--sp-line);padding:22px 24px}
 @media (max-width:600px){.spalte.gilt{padding:18px 16px}}
+/* Raster Team-Ansicht: Kalender oben rechts, auf dem Handy zuerst */
+.raster{grid-template-areas:"links kal" "links gilt";grid-template-rows:auto 1fr}
+.raster>.links{grid-area:links}.raster>.kal{grid-area:kal}.raster>.gilt{grid-area:gilt}
+@media (max-width:900px){.raster{grid-template-areas:"kal" "links" "gilt";grid-template-rows:auto}}
+/* Kalender */
+.kal{gap:12px}
+.kal-kopf{display:flex;align-items:center;gap:4px;padding-bottom:10px;border-bottom:1px solid var(--sp-text)}
+.kal-kopf h2{margin:0;flex:1;font-size:13px;font-weight:600}
+.kal-kopf .icon{width:36px;height:36px}
+.kal-kopf .icon:disabled{color:var(--sp-line2);cursor:default;background:none}
+.kal-raster{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+.kal-raster .wt{font-size:11px;font-weight:600;color:var(--sp-muted);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.04em}
+.kt{position:relative;height:38px;border:1px solid transparent;background:none;font-size:13.5px;font-variant-numeric:tabular-nums;cursor:pointer;color:var(--sp-text);padding:0}
+.kt:hover:not(:disabled){border-color:var(--sp-text)}
+.kt.heute{border-color:var(--sp-line2);font-weight:700}
+.kt.hat::after{content:"";position:absolute;left:50%;bottom:4px;width:5px;height:5px;margin-left:-2.5px;background:var(--navy)}
+.kt[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.kt[aria-pressed="true"].hat::after{background:#fff}
+.kt:disabled{color:#b4b4ae;cursor:default}
+.kal-fuss{margin:0;font-size:12.5px;color:var(--sp-muted)}
+/* Termin im Formular und am Beitrag */
+.termin-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;background:var(--navy);color:#fff;padding:6px 10px;text-transform:uppercase;letter-spacing:.05em}
+.zeit{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--sp-muted)}
+.zeit input{height:40px;border:1px solid var(--sp-line2);border-radius:0;padding:0 8px;background:#fff;font-size:14px}
+.termin-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--navy)}
 /* Beiträge */
 .post{background:#fff;border:1px solid var(--sp-line);padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
 .post.wichtig{background:var(--beige);border-color:var(--beige-rand)}
@@ -241,10 +266,16 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
 
   <!-- Team: alles -->
   <section id="team" class="ansicht" hidden>
-    <div class="zwei">
-      <section class="spalte">
+    <div class="zwei raster">
+      <section class="karte kal" id="kal" aria-label="Kalender"></section>
+      <section class="spalte links">
         <form class="composer" id="kurzForm" novalidate>
           <div class="zeile" style="flex-wrap:nowrap;gap:14px"><span id="kAva"></span><input type="text" class="rund" id="kText" maxlength="280" autocomplete="off" aria-label="Was gibt es Neues?" placeholder="Was gibt’s Neues?"></div>
+          <div class="zeile einr" id="kTermin" hidden>
+            <span class="termin-chip"><svg class="i i-s" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span id="kTerminText"></span></span>
+            <label class="zeit">Uhrzeit <input type="time" id="kZeit" aria-label="Uhrzeit (freiwillig)"></label>
+            <button class="tx" type="button" data-aktion="termin-weg">Termin entfernen</button>
+          </div>
           <div class="zeile einr">
             <span class="hinweis-dauer" id="kHinweis"><svg class="i i-s" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="kHinweisText"></span></span>
             <select id="kDauer" aria-label="Wie lange sichtbar?"><option value="auto">automatisch</option><option value="heute">bis heute Abend</option><option value="morgen">bis morgen</option><option value="uebermorgen">bis übermorgen</option><option value="woche">eine Woche</option></select>
@@ -299,15 +330,16 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
      g-<JJJJMMTT>-<zufall>.json        „Gilt jetzt“-Beitrag, bleibt bis „erledigt“
      r-<Beitrags-ID>~<Kürzel>.json     Reaktion einer Person (Umfrage, Danke, Antworten)
    Liest: Fotos/<Kürzel>.jpg|png und <Archivordner>/_Spektron-Mitarbeiter.json. Löscht nie Dateien. */
-const APP_VERSION = '0.3.1';
+const APP_VERSION = '0.4.0';
 const AENDERUNGEN = [
+  ['0.4.0', '17.11.2026', 'Kalender oben rechts: Tag wählen, Termin (mit freiwilliger Uhrzeit) eintragen – er steht links unter seinem Datum, bis der Tag vorbei ist. Bis zu einem Jahr im Voraus; Tage mit Terminen sind markiert.'],
   ['0.3.1', '17.11.2026', 'Bereich „Heute im Büro“ entfernt.'],
   ['0.3.0', '17.11.2026', 'Neues Aussehen: ruhig und redaktionell – eckige Karten mit Haarlinien, Schrift Inter (liegt in der App, kein Netz nötig), Überschriften in Versalien, dunkles Navy für Knöpfe, Status als Raster mit farbigem Merker.'],
   ['0.2.0', '17.11.2026', 'Neu aufgebaut nach Claudes Entwurf: Guten-Morgen-Seite einmal am Tag, Status „Heute im Büro“ (ohne Verlauf), „Heute & morgen“ nach Tagen mit automatischer Dauer aus dem Text („morgen“, „Freitag“, „20.11.“), „Gilt jetzt“ bis erledigt mit Archiv, Fotos aus _TeamKit\\Fotos, „Zurück zum Projekt“ beim Öffnen aus der Projektzentrale.'],
   ['0.1.0', '17.11.2026', 'Erste Fassung mit zwei Reitern (ersetzt).'],
 ];
 const TK_ORDNER = '_TeamKit', FOTO_ORDNER = 'Fotos', MA_FILE = '_Spektron-Mitarbeiter.json', ICH_KEY = 'spektron-ich';
-const KURZ_MAX_TAGE = 7, KURZ_DATUM_MAX = 60, MAX_BYTES = 30000;   // gewählte Dauer höchstens 1 Woche; ein Datum im Text („18.12.“) bis 60 Tage
+const KURZ_MAX_TAGE = 7, KURZ_DATUM_MAX = 60, TERMIN_MAX = 365, MAX_BYTES = 30000;   // gewählte Dauer höchstens 1 Woche; ein Datum im Text („18.12.“) bis 60 Tage
 const PARAM = new URLSearchParams(location.search);
 const EIN = PARAM.has('eingebettet');
 const $ = id => document.getElementById(id);
@@ -327,7 +359,7 @@ const S = {
   archiv: null, tk: null, schreiben: false, probe: false,
   personen: [], kurz: [], gilt: [], reakt: new Map(), fotos: new Map(), cache: new Map(),
   ansicht: 'zugang', offen: new Set(), giltBearbeite: null, giltZeigen: false, antwortOffen: '', frage: '', meldungen: [],
-  giltGesehenAnzeige: '', stand: '',
+  giltGesehenAnzeige: '', stand: '', termin: null, kalMonat: null,
 };
 
 /* ---------- Zeit ---------- */
@@ -344,8 +376,11 @@ function tagName(d) {
   const n = tageBis(d);
   if (n === 0) return 'heute'; if (n === 1) return 'morgen'; if (n === 2) return 'übermorgen';
   if (n > 2 && n < 7) return WOCHENTAGE[d.getDay()];
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.`;
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.` + (d.getFullYear() !== new Date().getFullYear() ? d.getFullYear() : '');
 }
+const monat = d => d.toLocaleDateString('de-DE', { month: 'long' });
+const ausIso = k => { const [y, m, t] = k.split('-').map(Number); return new Date(y, m - 1, t); };
+const terminText = (k, zeit) => { const d = ausIso(k); return `${WOCHENTAGE[d.getDay()]}, ${d.getDate()}. ${monat(d)}${d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : ''}${zeit ? ' · ' + zeit + ' Uhr' : ''}`; };
 function wann(iso) {
   const d = new Date(iso); if (isNaN(d)) return '';
   const min = Math.round((Date.now() - d) / 60000);
@@ -399,6 +434,7 @@ function meldung(art, html, id) {
   $('meldungen').innerHTML = S.meldungen.map(m => `<div class="meldung ${m.art}">${m.html}</div>`).join('');
 }
 const ICON = {
+  kal: '<svg class="i i-s" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   danke: '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11"/><path d="M15 5.9 14 10h5.8a2 2 0 0 1 2 2.3l-1.4 7a2 2 0 0 1-2 1.7H7V10l4-8a3 3 0 0 1 3 3.9z"/></svg>',
   antw: '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.8 7L3 21l2-6.2A8 8 0 1 1 21 12z"/></svg>',
   pin: '<svg class="i i-s" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>',
@@ -530,7 +566,8 @@ const von = o => (o && typeof o.name === 'string' && o.name.trim()) ? { kuerzel:
 const isoOk = s => typeof s === 'string' && !isNaN(new Date(s));
 function pruefeKurz(o, id) {
   if (!o || o.format !== 'teamkit-kurz' || o.id !== id || !von(o.von) || !isoOk(o.am) || !isoOk(o.bis) || typeof o.text !== 'string') return null;
-  return { id, art: 'kurz', text: o.text.slice(0, 280), umfrage: o.umfrage === true, bis: o.bis, von: von(o.von), am: o.am, weg: o.geloescht === true };
+  return { id, art: 'kurz', text: o.text.slice(0, 280), umfrage: o.umfrage === true, bis: o.bis, von: von(o.von), am: o.am, weg: o.geloescht === true,
+    termin: /^\d{4}-\d{2}-\d{2}$/.test(o.termin) && !isNaN(ausIso(o.termin)) ? o.termin : '', zeit: /^([01]\d|2[0-3]):[0-5]\d$/.test(o.zeit) ? o.zeit : '' };
 }
 function pruefeGilt(o, id) {
   if (!o || o.format !== 'teamkit-gilt' || o.id !== id || !von(o.von) || !isoOk(o.am) || typeof o.titel !== 'string') return null;
@@ -553,7 +590,7 @@ async function lies(name, h) {
 let ladeNr = 0;
 async function laden() {
   if (!S.tk) return false;
-  const nr = ++ladeNr, ab = tagStr(plusTage(heute0(), -(KURZ_DATUM_MAX + 2))), kurz = [], gilt = [], reakt = new Map(), rd = [];
+  const nr = ++ladeNr, ab = tagStr(plusTage(heute0(), -(TERMIN_MAX + 2))), kurz = [], gilt = [], reakt = new Map(), rd = [];
   try {
     for await (const [name, h] of S.tk.entries()) {
       if (h.kind !== 'file') continue;
@@ -571,6 +608,7 @@ async function laden() {
   S.stand = neu; S.kurz = kurz; S.gilt = gilt; S.reakt = reakt;
   melden(); return geaendert;
 }
+const kurzReihe = (a, b) => a.bis.localeCompare(b.bis) || (a.zeit || '~').localeCompare(b.zeit || '~') || b.am.localeCompare(a.am);
 const kurzAktiv = () => S.kurz.filter(e => new Date(e.bis) >= new Date());
 const giltAktiv = () => S.gilt.filter(e => !e.erledigt);
 const giltGesehen = () => lokal.get('teamkit-gilt-gesehen');
@@ -644,9 +682,9 @@ function kurzHtml(e) {
       ${ja.length ? `<span class="stapel">${ja.slice(0, 6).map(x => ava(x.von, 24)).join('')}</span><span class="namen"><b>${ja.length} dabei:</b> ${namenListe(ja)}</span>` : ''}</div>
       ${nein.length ? `<span class="namen">${nein.length} nicht dabei: ${namenListe(nein)}</span>` : ''}`;
   }
-  return `<article class="post">${ava(e.von, 34)}<div class="rumpf"><span class="text">${esc(e.text)}</span>${umfrage}
+  return `<article class="post">${ava(e.von, 34)}<div class="rumpf">${e.termin ? `<span class="termin-tag">${ICON.kal}${esc(terminText(e.termin, e.zeit))}</span>` : ''}<span class="text">${esc(e.text)}</span>${umfrage}
     <div class="zeile abst">${aktionenHtml(e, r, !e.umfrage)}</div>${antwortenHtml(e, r)}
-    <div class="zeile"><span class="meta">${esc(vorname(e.von.name))} · ${wann(e.am)}${e.umfrage ? ' · Umfrage' : ''} · ${bisText(new Date(e.bis))}</span>${istIch(e.von) ? frageHtml(e, 'abnehmen', '', 'Abnehmen') : ''}</div></div></article>`;
+    <div class="zeile"><span class="meta">${esc(vorname(e.von.name))} · ${wann(e.am)}${e.umfrage ? ' · Umfrage' : ''}${e.termin ? '' : ' · ' + bisText(new Date(e.bis))}</span>${istIch(e.von) ? frageHtml(e, 'abnehmen', '', 'Abnehmen') : ''}</div></div></article>`;
 }
 function linkHtml(l) {
   if (!l) return '';
@@ -669,7 +707,7 @@ function renderMorgen() {
   const p = ich(), h = new Date().getHours();
   $('mDatum').textContent = `${WOCHENTAGE[new Date().getDay()]}, ${new Date().toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`;
   $('mGruss').textContent = (h < 11 ? 'Guten Morgen' : h < 18 ? 'Hallo' : 'Guten Abend') + (p ? ', ' + vorname(p.name) : '');
-  const bald = kurzBald().sort((a, b) => a.bis.localeCompare(b.bis) || b.am.localeCompare(a.am));
+  const bald = kurzBald().sort(kurzReihe);
   $('mBald').innerHTML = bald.length ? bald.slice(0, 5).map(kurzHtml).join('') + (bald.length > 5 ? `<button class="tx" type="button" data-aktion="zu-team">und ${bald.length - 5} weitere</button>` : '') : '<div class="leer">Heute und morgen steht nichts an.</div>';
   const neu = giltNeu().sort((a, b) => (b.wichtig - a.wichtig) || b.am.localeCompare(a.am));
   $('mNeuZahl').textContent = neu.length ? `${neu.length} seit deinem letzten Besuch` : '';
@@ -678,10 +716,11 @@ function renderMorgen() {
   const f = document.querySelector('#morgen form[data-antwort] input'); if (f) f.focus();
 }
 function renderTeam() {
+  renderKal();
   const p = ich(); $('kAva').innerHTML = p ? ava(p, 34) : ''; $('kText').placeholder = 'Was gibt’s Neues' + (p ? ', ' + vorname(p.name) : '') + '?';
   dauerHinweis();
   const gruppen = new Map();
-  for (const e of kurzAktiv().sort((a, b) => a.bis.localeCompare(b.bis) || b.am.localeCompare(a.am))) {
+  for (const e of kurzAktiv().sort(kurzReihe)) {
     const t = tagName(new Date(e.bis)), k = t.charAt(0).toUpperCase() + t.slice(1);
     if (!gruppen.has(k)) gruppen.set(k, []); gruppen.get(k).push(e);
   }
@@ -692,12 +731,41 @@ function renderTeam() {
   $('giltForm').hidden = !S.giltZeigen;
   const f = document.querySelector('#team form[data-antwort] input'); if (f) f.focus();
 }
+function renderKal() {
+  const h = heute0(), max = plusTage(h, TERMIN_MAX), heuteK = isoTag(h);
+  const m = S.kalMonat || (S.kalMonat = new Date(h.getFullYear(), h.getMonth(), 1));
+  const versatz = (m.getDay() + 6) % 7, tage = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
+  const termine = new Map(); for (const e of kurzAktiv()) if (e.termin) termine.set(e.termin, (termine.get(e.termin) || 0) + 1);
+  const gew = S.termin ? isoTag(S.termin) : '';
+  let z = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(w => `<span class="wt" aria-hidden="true">${w}</span>`).join('') + '<span aria-hidden="true"></span>'.repeat(versatz);
+  for (let t = 1; t <= tage; t++) {
+    const d = new Date(m.getFullYear(), m.getMonth(), t), k = isoTag(d), n = termine.get(k) || 0, aus = d < h || d > max;
+    z += `<button type="button" class="kt${k === heuteK ? ' heute' : ''}${n ? ' hat' : ''}" data-aktion="kal-tag" data-wert="${k}" aria-pressed="${k === gew}" aria-label="${t}. ${monat(d)}${k === heuteK ? ', heute' : ''}${n ? `, ${n} Termin${n > 1 ? 'e' : ''}` : ''}"${aus ? ' disabled' : ''}>${t}</button>`;
+  }
+  const zurueck = m.getFullYear() * 12 + m.getMonth() <= h.getFullYear() * 12 + h.getMonth(), vor = m.getFullYear() * 12 + m.getMonth() >= max.getFullYear() * 12 + max.getMonth();
+  $('kal').innerHTML = `<div class="kal-kopf"><h2 class="cap" aria-live="polite">${monat(m)} ${m.getFullYear()}</h2>
+    <button class="icon" type="button" data-aktion="kal-monat" data-wert="-1" aria-label="Voriger Monat"${zurueck ? ' disabled' : ''}><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+    <button class="icon" type="button" data-aktion="kal-monat" data-wert="1" aria-label="Nächster Monat"${vor ? ' disabled' : ''}><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div>
+    <div class="kal-raster" role="group" aria-label="Tag für einen Termin wählen">${z}</div>
+    <p class="kal-fuss">${S.termin ? 'Jetzt links den Termin eintragen.' : 'Tag wählen, um einen Termin einzutragen.'}</p>`;
+}
+function terminWaehlen(k) {
+  if (!ichOderFrage()) return;
+  S.termin = k && (!S.termin || isoTag(S.termin) !== k) ? ausIso(k) : null;
+  if (!S.termin) $('kZeit').value = '';
+  renderKal(); dauerHinweis();
+  if (S.termin) $('kText').focus();
+}
 function renderArchiv() {
   const q = norm($('aSuche').value);
   const l = S.gilt.filter(e => e.erledigt && (!q || norm(e.titel + ' ' + e.text + ' ' + e.von.name).includes(q))).sort((a, b) => b.erledigt.am.localeCompare(a.erledigt.am));
   $('aListe').innerHTML = l.length ? l.map(e => giltHtml(e, true)).join('') : `<div class="leer">${q ? 'Nichts gefunden.' : 'Noch nichts erledigt.'}</div>`;
 }
 function dauerHinweis() {
+  const t = S.termin;
+  $('kTermin').hidden = !t; $('kHinweis').hidden = !!t; $('kDauer').hidden = !!t;
+  if (t) { $('kTerminText').textContent = terminText(isoTag(t)); $('kText').placeholder = `Was ist am ${t.getDate()}. ${monat(t)}?`; return; }
+  const p = ich(); $('kText').placeholder = 'Was gibt’s Neues' + (p ? ', ' + vorname(p.name) : '') + '?';
   const text = $('kText').value, wahl = $('kDauer').value, bis = bisAus(wahl, text), e = erkenneTag(text);
   $('kHinweisText').textContent = wahl === 'auto' && e ? `„${e.wort}“ erkannt → bleibt ${bisText(bis)}` : `bleibt ${bisText(bis)}`;
 }
@@ -722,9 +790,11 @@ $('kurzForm').addEventListener('submit', async ev => {
   ev.preventDefault();
   const text = $('kText').value.trim(); $('kFehler').textContent = '';
   if (!text) { $('kFehler').textContent = 'Bitte erst etwas schreiben.'; $('kText').focus(); return; }
-  const bis = bisAus($('kDauer').value, text);
-  if (await speichern('kurz', { text, umfrage: $('kUmfrage').checked, bis: bis.toISOString() })) {
-    $('kText').value = ''; $('kUmfrage').checked = false; $('kDauer').value = 'auto'; toast('Gepostet – ' + bisText(bis) + '.'); render();
+  const t = S.termin, zeit = t && /^([01]\d|2[0-3]):[0-5]\d$/.test($('kZeit').value) ? $('kZeit').value : '';
+  const bis = t ? abend(t) : bisAus($('kDauer').value, text);
+  if (await speichern('kurz', { text, umfrage: $('kUmfrage').checked, bis: bis.toISOString(), ...(t ? { termin: isoTag(t), ...(zeit ? { zeit } : {}) } : {}) })) {
+    $('kText').value = ''; $('kUmfrage').checked = false; $('kDauer').value = 'auto'; $('kZeit').value = ''; S.termin = null;
+    toast(t ? 'Termin eingetragen – ' + terminText(isoTag(t), zeit) + '.' : 'Gepostet – ' + bisText(bis) + '.'); render();
   }
 });
 function giltFormAuf(e) {
@@ -753,7 +823,10 @@ $('aSuche').addEventListener('input', renderArchiv);
 document.addEventListener('click', async ev => {
   const k = ev.target.closest('[data-aktion]'); if (!k) return;
   const a = k.dataset.aktion, id = k.dataset.id, e = id ? [...S.kurz, ...S.gilt].find(x => x.id === id) : null;
-  if (a === 'los') verlasseMorgen();
+  if (a === 'kal-tag') terminWaehlen(k.dataset.wert);
+  else if (a === 'termin-weg') terminWaehlen('');
+  else if (a === 'kal-monat') { const m = S.kalMonat; S.kalMonat = new Date(m.getFullYear(), m.getMonth() + +k.dataset.wert, 1); renderKal(); }
+  else if (a === 'los') verlasseMorgen();
   else if (a === 'zu-team') { if (S.ansicht === 'morgen') { lokal.set('teamkit-morgen', isoTag(new Date())); } zuTeam(); }
   else if (a === 'auf') { if (S.offen.has(id)) S.offen.delete(id); else S.offen.add(id); render(); }
   else if (a === 'danke' && e) reaktion(id, o => { o.danke = !o.danke; });
