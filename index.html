@@ -130,27 +130,33 @@ main{max-width:1320px;margin:0 auto;padding:var(--abstand) 24px 56px;display:fle
 .raster{grid-template-areas:"links kal" "links gilt";grid-template-rows:auto 1fr}
 .raster>.links{grid-area:links}.raster>.kal{grid-area:kal}.raster>.gilt{grid-area:gilt}
 @media (max-width:900px){.raster{grid-template-areas:"kal" "links" "gilt";grid-template-rows:auto}}
-/* Kalender */
-.kal{gap:12px}
-.kal-kopf{display:flex;align-items:center;gap:4px;padding-bottom:10px;border-bottom:1px solid var(--sp-text)}
-.kal-kopf h2{margin:0;flex:1;font-size:13px;font-weight:600}
-.kal-kopf .icon{width:36px;height:36px}
+/* Kalender – kompakt */
+.kal{gap:8px;padding:14px 16px 12px}
+.kal-kopf{display:flex;align-items:center;gap:2px;padding-bottom:6px;border-bottom:1px solid var(--sp-text)}
+.kal-kopf h2{margin:0;flex:1;font-size:12px;font-weight:600}
+.kal-kopf .icon{width:32px;height:32px}
+.kal-kopf .icon svg{width:16px;height:16px}
 .kal-kopf .icon:disabled{color:var(--sp-line2);cursor:default;background:none}
 .kal-raster{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
-.kal-raster .wt{font-size:11px;font-weight:600;color:var(--sp-muted);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.04em}
-.kt{position:relative;height:38px;border:1px solid transparent;background:none;font-size:13.5px;font-variant-numeric:tabular-nums;cursor:pointer;color:var(--sp-text);padding:0}
+.kal-raster .wt{font-size:10px;font-weight:600;color:var(--sp-muted);text-align:center;padding:2px 0;text-transform:uppercase;letter-spacing:.04em}
+.kt{position:relative;height:30px;border:1px solid transparent;background:none;font-size:12.5px;font-variant-numeric:tabular-nums;cursor:pointer;color:var(--sp-text);padding:0 0 3px}
 .kt:hover:not(:disabled){border-color:var(--sp-text)}
 .kt.heute{border-color:var(--sp-line2);font-weight:700}
-.kt.hat::after{content:"";position:absolute;left:50%;bottom:4px;width:5px;height:5px;margin-left:-2.5px;background:var(--navy)}
-.kt[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
-.kt[aria-pressed="true"].hat::after{background:#fff}
+.kt.hat{background:color-mix(in srgb,var(--tf) 17%,#fff);color:var(--tf);font-weight:700;box-shadow:inset 0 -2px 0 var(--tf)}
+.kt .punkte{position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:2px}
+.kt .punkte i{width:4px;height:4px;background:var(--c)}
+.kt.hat .punkte{display:none}
+.kt.hat.mehr .punkte{display:flex}
+.kt[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:none}
+.kt[aria-pressed="true"] .punkte i{box-shadow:0 0 0 1px #fff}
 .kt:disabled{color:#b4b4ae;cursor:default}
-.kal-fuss{margin:0;font-size:12.5px;color:var(--sp-muted)}
-/* Termin im Formular und am Beitrag */
-.termin-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;background:var(--navy);color:#fff;padding:6px 10px;text-transform:uppercase;letter-spacing:.05em}
+.kal-fuss{margin:0;font-size:12px;color:var(--sp-muted)}
+/* Termin im Formular und am Beitrag – Farbe je Termin über --tf */
+.termin-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;background:var(--tf,var(--navy));color:#fff;padding:6px 10px;text-transform:uppercase;letter-spacing:.05em}
 .zeit{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--sp-muted)}
 .zeit input{height:40px;border:1px solid var(--sp-line2);border-radius:0;padding:0 8px;background:#fff;font-size:14px}
-.termin-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--navy)}
+.post.termin{border-left:3px solid var(--tf)}
+.termin-tag{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tf);background:color-mix(in srgb,var(--tf) 11%,#fff);padding:4px 8px}
 /* Beiträge */
 .post{background:#fff;border:1px solid var(--sp-line);padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
 .post.wichtig{background:var(--beige);border-color:var(--beige-rand)}
@@ -330,8 +336,9 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
      g-<JJJJMMTT>-<zufall>.json        „Gilt jetzt“-Beitrag, bleibt bis „erledigt“
      r-<Beitrags-ID>~<Kürzel>.json     Reaktion einer Person (Umfrage, Danke, Antworten)
    Liest: Fotos/<Kürzel>.jpg|png und <Archivordner>/_Spektron-Mitarbeiter.json. Löscht nie Dateien. */
-const APP_VERSION = '0.4.0';
+const APP_VERSION = '0.4.1';
 const AENDERUNGEN = [
+  ['0.4.1', '17.11.2026', 'Kalender kompakter. Jeder Termin bekommt automatisch eine eigene Farbe: farbiger Tag im Kalender, Rand und Datum am Beitrag, Farbvorschau beim Eintragen.'],
   ['0.4.0', '17.11.2026', 'Kalender oben rechts: Tag wählen, Termin (mit freiwilliger Uhrzeit) eintragen – er steht links unter seinem Datum, bis der Tag vorbei ist. Bis zu einem Jahr im Voraus; Tage mit Terminen sind markiert.'],
   ['0.3.1', '17.11.2026', 'Bereich „Heute im Büro“ entfernt.'],
   ['0.3.0', '17.11.2026', 'Neues Aussehen: ruhig und redaktionell – eckige Karten mit Haarlinien, Schrift Inter (liegt in der App, kein Netz nötig), Überschriften in Versalien, dunkles Navy für Knöpfe, Status als Raster mit farbigem Merker.'],
@@ -377,6 +384,15 @@ function tagName(d) {
   if (n === 0) return 'heute'; if (n === 1) return 'morgen'; if (n === 2) return 'übermorgen';
   if (n > 2 && n < 7) return WOCHENTAGE[d.getDay()];
   return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.` + (d.getFullYear() !== new Date().getFullYear() ? d.getFullYear() : '');
+}
+/** Termin-Farben: gedeckt, alle mit weißer Schrift ≥ 4,5:1 und als Schrift auf hellem Ton lesbar. */
+const TERMIN_FARBEN = ['#2f6b52', '#3f5aa8', '#9b3f4f', '#8a5526', '#6a4f8a', '#23627e', '#66602a', '#a04a2a'];
+const terminFarbe = e => TERMIN_FARBEN[e.farbe >= 0 ? e.farbe : [...String(e.id)].reduce((a, c) => a + c.charCodeAt(0), 0) % TERMIN_FARBEN.length];
+/** Für einen neuen Termin die Farbe, die unter den laufenden Terminen am seltensten vorkommt. */
+function naechsteFarbe() {
+  const n = TERMIN_FARBEN.map(() => 0);
+  for (const e of S.kurz) if (e.termin && new Date(e.bis) >= new Date()) n[TERMIN_FARBEN.indexOf(terminFarbe(e))]++;
+  return n.indexOf(Math.min(...n));
 }
 const monat = d => d.toLocaleDateString('de-DE', { month: 'long' });
 const ausIso = k => { const [y, m, t] = k.split('-').map(Number); return new Date(y, m - 1, t); };
@@ -567,7 +583,8 @@ const isoOk = s => typeof s === 'string' && !isNaN(new Date(s));
 function pruefeKurz(o, id) {
   if (!o || o.format !== 'teamkit-kurz' || o.id !== id || !von(o.von) || !isoOk(o.am) || !isoOk(o.bis) || typeof o.text !== 'string') return null;
   return { id, art: 'kurz', text: o.text.slice(0, 280), umfrage: o.umfrage === true, bis: o.bis, von: von(o.von), am: o.am, weg: o.geloescht === true,
-    termin: /^\d{4}-\d{2}-\d{2}$/.test(o.termin) && !isNaN(ausIso(o.termin)) ? o.termin : '', zeit: /^([01]\d|2[0-3]):[0-5]\d$/.test(o.zeit) ? o.zeit : '' };
+    termin: /^\d{4}-\d{2}-\d{2}$/.test(o.termin) && !isNaN(ausIso(o.termin)) ? o.termin : '', zeit: /^([01]\d|2[0-3]):[0-5]\d$/.test(o.zeit) ? o.zeit : '',
+    farbe: Number.isInteger(o.farbe) && o.farbe >= 0 && o.farbe < TERMIN_FARBEN.length ? o.farbe : -1 };
 }
 function pruefeGilt(o, id) {
   if (!o || o.format !== 'teamkit-gilt' || o.id !== id || !von(o.von) || !isoOk(o.am) || typeof o.titel !== 'string') return null;
@@ -682,7 +699,7 @@ function kurzHtml(e) {
       ${ja.length ? `<span class="stapel">${ja.slice(0, 6).map(x => ava(x.von, 24)).join('')}</span><span class="namen"><b>${ja.length} dabei:</b> ${namenListe(ja)}</span>` : ''}</div>
       ${nein.length ? `<span class="namen">${nein.length} nicht dabei: ${namenListe(nein)}</span>` : ''}`;
   }
-  return `<article class="post">${ava(e.von, 34)}<div class="rumpf">${e.termin ? `<span class="termin-tag">${ICON.kal}${esc(terminText(e.termin, e.zeit))}</span>` : ''}<span class="text">${esc(e.text)}</span>${umfrage}
+  return `<article class="post${e.termin ? ' termin' : ''}"${e.termin ? ` style="--tf:${terminFarbe(e)}"` : ''}>${ava(e.von, 34)}<div class="rumpf">${e.termin ? `<span class="termin-tag">${ICON.kal}${esc(terminText(e.termin, e.zeit))}</span>` : ''}<span class="text">${esc(e.text)}</span>${umfrage}
     <div class="zeile abst">${aktionenHtml(e, r, !e.umfrage)}</div>${antwortenHtml(e, r)}
     <div class="zeile"><span class="meta">${esc(vorname(e.von.name))} · ${wann(e.am)}${e.umfrage ? ' · Umfrage' : ''}${e.termin ? '' : ' · ' + bisText(new Date(e.bis))}</span>${istIch(e.von) ? frageHtml(e, 'abnehmen', '', 'Abnehmen') : ''}</div></div></article>`;
 }
@@ -735,12 +752,12 @@ function renderKal() {
   const h = heute0(), max = plusTage(h, TERMIN_MAX), heuteK = isoTag(h);
   const m = S.kalMonat || (S.kalMonat = new Date(h.getFullYear(), h.getMonth(), 1));
   const versatz = (m.getDay() + 6) % 7, tage = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
-  const termine = new Map(); for (const e of kurzAktiv()) if (e.termin) termine.set(e.termin, (termine.get(e.termin) || 0) + 1);
+  const termine = new Map(); for (const e of kurzAktiv().sort(kurzReihe)) if (e.termin) { if (!termine.has(e.termin)) termine.set(e.termin, []); termine.get(e.termin).push(terminFarbe(e)); }
   const gew = S.termin ? isoTag(S.termin) : '';
   let z = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(w => `<span class="wt" aria-hidden="true">${w}</span>`).join('') + '<span aria-hidden="true"></span>'.repeat(versatz);
   for (let t = 1; t <= tage; t++) {
-    const d = new Date(m.getFullYear(), m.getMonth(), t), k = isoTag(d), n = termine.get(k) || 0, aus = d < h || d > max;
-    z += `<button type="button" class="kt${k === heuteK ? ' heute' : ''}${n ? ' hat' : ''}" data-aktion="kal-tag" data-wert="${k}" aria-pressed="${k === gew}" aria-label="${t}. ${monat(d)}${k === heuteK ? ', heute' : ''}${n ? `, ${n} Termin${n > 1 ? 'e' : ''}` : ''}"${aus ? ' disabled' : ''}>${t}</button>`;
+    const d = new Date(m.getFullYear(), m.getMonth(), t), k = isoTag(d), f = termine.get(k) || [], n = f.length, aus = d < h || d > max;
+    z += `<button type="button" class="kt${k === heuteK ? ' heute' : ''}${n ? ' hat' : ''}${n > 1 ? ' mehr' : ''}" data-aktion="kal-tag" data-wert="${k}" aria-pressed="${k === gew}" aria-label="${t}. ${monat(d)}${k === heuteK ? ', heute' : ''}${n ? `, ${n} Termin${n > 1 ? 'e' : ''}` : ''}"${n ? ` style="--tf:${f[0]}"` : ''}${aus ? ' disabled' : ''}>${t}${n ? `<span class="punkte" aria-hidden="true">${f.slice(0, 3).map(c => `<i style="--c:${c}"></i>`).join('')}</span>` : ''}</button>`;
   }
   const zurueck = m.getFullYear() * 12 + m.getMonth() <= h.getFullYear() * 12 + h.getMonth(), vor = m.getFullYear() * 12 + m.getMonth() >= max.getFullYear() * 12 + max.getMonth();
   $('kal').innerHTML = `<div class="kal-kopf"><h2 class="cap" aria-live="polite">${monat(m)} ${m.getFullYear()}</h2>
@@ -764,7 +781,7 @@ function renderArchiv() {
 function dauerHinweis() {
   const t = S.termin;
   $('kTermin').hidden = !t; $('kHinweis').hidden = !!t; $('kDauer').hidden = !!t;
-  if (t) { $('kTerminText').textContent = terminText(isoTag(t)); $('kText').placeholder = `Was ist am ${t.getDate()}. ${monat(t)}?`; return; }
+  if (t) { $('kTerminText').textContent = terminText(isoTag(t)); $('kTermin').style.setProperty('--tf', TERMIN_FARBEN[naechsteFarbe()]); $('kText').placeholder = `Was ist am ${t.getDate()}. ${monat(t)}?`; return; }
   const p = ich(); $('kText').placeholder = 'Was gibt’s Neues' + (p ? ', ' + vorname(p.name) : '') + '?';
   const text = $('kText').value, wahl = $('kDauer').value, bis = bisAus(wahl, text), e = erkenneTag(text);
   $('kHinweisText').textContent = wahl === 'auto' && e ? `„${e.wort}“ erkannt → bleibt ${bisText(bis)}` : `bleibt ${bisText(bis)}`;
@@ -792,7 +809,7 @@ $('kurzForm').addEventListener('submit', async ev => {
   if (!text) { $('kFehler').textContent = 'Bitte erst etwas schreiben.'; $('kText').focus(); return; }
   const t = S.termin, zeit = t && /^([01]\d|2[0-3]):[0-5]\d$/.test($('kZeit').value) ? $('kZeit').value : '';
   const bis = t ? abend(t) : bisAus($('kDauer').value, text);
-  if (await speichern('kurz', { text, umfrage: $('kUmfrage').checked, bis: bis.toISOString(), ...(t ? { termin: isoTag(t), ...(zeit ? { zeit } : {}) } : {}) })) {
+  if (await speichern('kurz', { text, umfrage: $('kUmfrage').checked, bis: bis.toISOString(), ...(t ? { termin: isoTag(t), farbe: naechsteFarbe(), ...(zeit ? { zeit } : {}) } : {}) })) {
     $('kText').value = ''; $('kUmfrage').checked = false; $('kDauer').value = 'auto'; $('kZeit').value = ''; S.termin = null;
     toast(t ? 'Termin eingetragen – ' + terminText(isoTag(t), zeit) + '.' : 'Gepostet – ' + bisText(bis) + '.'); render();
   }
