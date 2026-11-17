@@ -342,8 +342,9 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
      g-<JJJJMMTT>-<zufall>.json        „Gilt jetzt“-Beitrag, bleibt bis „erledigt“
      r-<Beitrags-ID>~<Kürzel>.json     Reaktion einer Person (Umfrage, Danke, Antworten)
    Liest: Fotos/<Kürzel>.jpg|png und <Archivordner>/_Spektron-Mitarbeiter.json. Löscht nie Dateien. */
-const APP_VERSION = '0.4.3';
+const APP_VERSION = '0.4.4';
 const AENDERUNGEN = [
+  ['0.4.4', '17.11.2026', 'Öffnet TeamKit direkt die Team-Ansicht, sind nur noch wirklich neue „Gilt jetzt“-Beiträge als „Neu“ markiert (vorher jedes Mal alle von anderen).'],
   ['0.4.3', '17.11.2026', 'Schneller auf dem Netzlaufwerk (Termine heißen nach ihrem Tag, es wird nur noch gut zwei Monate zurück gelesen). Datum im Text robuster („0.4.2“, „31.02.“ zählen nicht). Guten Morgen mit mehr als drei Neuigkeiten behält die „Neu“-Marken. Änderungen gehen beim Tippen nicht mehr verloren. Kalender: Fokus bleibt beim Blättern, Monat wird angesagt, größere Tasten auf dem Handy, Klick auf einen Tag mit Terminen markiert sie. Kein doppeltes Datum an Terminen.'],
   ['0.4.2', '17.11.2026', 'Termine: die ganze Karte im Ton ihrer Farbe, Datumsschild farbig gefüllt.'],
   ['0.4.1', '17.11.2026', 'Kalender kompakter. Jeder Termin bekommt automatisch eine eigene Farbe: farbiger Tag im Kalender, Rand und Datum am Beitrag, Farbvorschau beim Eintragen.'],
@@ -568,7 +569,8 @@ async function verbinden(fragen) {
 async function bereit() {
   await personenLaden(); await fotosLaden(); await laden(); ichBanner();
   const start = PARAM.get('start');
-  zeige(start === 'team' ? 'team' : (start === 'morgen' || morgenFaellig()) ? 'morgen' : 'team');
+  if (start !== 'team' && (start === 'morgen' || morgenFaellig())) zeige('morgen');
+  else zuTeam();   // auch direkt in die Team-Ansicht: „Neu“ ab dem letzten Besuch, danach als gesehen merken
 }
 async function archivWaehlen() {
   let h; try { h = await window.showDirectoryPicker({ id: 'teamkit-archiv', mode: 'read' }); } catch (e) { return; }
