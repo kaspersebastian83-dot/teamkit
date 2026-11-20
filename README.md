@@ -53,3 +53,15 @@ Die Projektzentrale (gleiche Adresse `kaspersebastian83-dot.github.io`) lädt Te
 Solange TeamKit unsichtbar im Rahmen liegt, gilt nichts als gesehen: `teamkit-morgen` und `teamkit-gilt-gesehen` setzen nur „Los geht’s“, „Zurück“/Esc, „Alles anzeigen“ und „Zurück“ aus Archiv/Über.
 
 **Testseite:** `rahmen-test.html` bettet TeamKit genau so ein, zeigt alle Nachrichten mit Uhrzeit und den Stand („bereit: ja/nein“). `rahmen-test.html?probe=1` lädt TeamKit im Probe-Modus. Die Seite enthält keine Daten und liegt nicht im Offline-Speicher.
+
+## Rückmeldung
+
+Unter „⋯“ › „Fehler oder Wunsch melden“ öffnet die Rückmeldung-App mit TeamKit und Version vorgewählt (`../rueckmeldung/?app=teamkit&version=…`, ab Rückmeldung 1.5.0).
+
+## Tests
+
+```sh
+node tests/regeln.cjs   # Datum im Text, Lesefenster der Dateien, „Neu“ bei Gilt jetzt, Rückmeldung-Link – ohne Browser, festes Datum
+```
+
+Läuft in GitHub Actions bei jedem Pull Request und auf `main` (`.github/workflows/tests.yml`).

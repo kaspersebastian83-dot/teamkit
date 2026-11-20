@@ -96,6 +96,7 @@ details.mehr summary{list-style:none}
 details.mehr summary::-webkit-details-marker{display:none}
 details.mehr .menue{position:absolute;right:0;top:48px;background:var(--sp-panel);border:1px solid var(--sp-text);padding:6px 0;display:flex;flex-direction:column;min-width:260px;z-index:6}
 details.mehr .menue button{height:44px;border:0;background:none;text-align:left;padding:0 18px;cursor:pointer;font-size:14px}
+details.mehr .menue a{display:flex;align-items:center;height:44px;padding:0 18px;font-size:14px;color:inherit;text-decoration:none}
 details.mehr .menue button:hover{background:var(--sp-panel2)}
 /* Seite */
 main{max-width:1320px;margin:0 auto;padding:var(--abstand) 24px 56px;display:flex;flex-direction:column;gap:var(--abstand)}
@@ -247,6 +248,7 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
       <button type="button" id="mIch">Ich bin … ändern</button>
       <button type="button" id="mOrdner">Anderen Archivordner wählen …</button>
       <button type="button" id="mUeber">Über TeamKit</button>
+      <a id="mRueck" href="../rueckmeldung/?app=teamkit" target="rueckmeldung" rel="noopener">Fehler oder Wunsch melden ↗</a>
     </div></details>
 </header>
 <main>
@@ -343,8 +345,9 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
      g-<JJJJMMTT>-<zufall>.json        „Gilt jetzt“-Beitrag, bleibt bis „erledigt“
      r-<Beitrags-ID>~<Kürzel>.json     Reaktion einer Person (Umfrage, Danke, Antworten)
    Liest: Fotos/<Kürzel>.jpg|png und <Archivordner>/_Spektron-Mitarbeiter.json. Löscht nie Dateien. */
-const APP_VERSION = '0.5.0';
+const APP_VERSION = '0.5.1';
 const AENDERUNGEN = [
+  ['0.5.1', '20.11.2026', 'Ein vergangenes Datum ohne Jahr im Text („Fotos vom Sommerfest 12.09.“) hält eine Notiz nicht mehr 60 Tage – sie gilt wie ohne Datum bis heute Abend; ein Datum kurz nach dem Jahreswechsel („09.01.“ im Dezember) zählt weiter. Neu unter „⋯“: „Fehler oder Wunsch melden“ (Rückmeldung mit TeamKit und Version vorgewählt).'],
   ['0.5.0', '17.11.2026', 'Vorbereitet für die Projektzentrale: TeamKit läuft dort unsichtbar im Rahmen, meldet seinen Stand auch ohne Zugriff (bereit/grund), öffnet sich auf Nachricht – auf Wunsch direkt bei einem „Gilt jetzt“-Beitrag – und schließt mit „Zurück“ oder Esc. Unsichtbar geladen gilt nichts als gesehen. Testseite rahmen-test.html.'],
   ['0.4.4', '17.11.2026', 'Öffnet TeamKit direkt die Team-Ansicht, sind nur noch wirklich neue „Gilt jetzt“-Beiträge als „Neu“ markiert (vorher jedes Mal alle von anderen).'],
   ['0.4.3', '17.11.2026', 'Schneller auf dem Netzlaufwerk (Termine heißen nach ihrem Tag, es wird nur noch gut zwei Monate zurück gelesen). Datum im Text robuster („0.4.2“, „31.02.“ zählen nicht). Guten Morgen mit mehr als drei Neuigkeiten behält die „Neu“-Marken. Änderungen gehen beim Tippen nicht mehr verloren. Kalender: Fokus bleibt beim Blättern, Monat wird angesagt, größere Tasten auf dem Handy, Klick auf einen Tag mit Terminen markiert sie. Kein doppeltes Datum an Terminen.'],
@@ -427,7 +430,8 @@ function erkenneTag(text) {
     const tagZ = +m[1], mon = +m[2], y = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : h.getFullYear();
     const gueltig = d => d.getDate() === tagZ && d.getMonth() === mon - 1;
     let d = new Date(y, mon - 1, tagZ); if (!gueltig(d)) continue;
-    if (!m[3] && d < h) { d = new Date(y + 1, mon - 1, tagZ); if (!gueltig(d)) continue; }
+    // ohne Jahr ins nächste Jahr nur, wenn es bald ist („09.01.“ im Dezember) – ein vergangenes Datum („Sommerfest 12.09.“) zählt nicht (Audit Lauf 3, C12)
+    if (!m[3] && d < h) { d = new Date(y + 1, mon - 1, tagZ); if (!gueltig(d) || tageBis(d) > KURZ_DATUM_MAX) continue; }
     if (d >= h) return { tag: d, wort: m[0] };
   }
   if (new RegExp(B + 'übermorgen' + E).test(t)) return { tag: plusTage(h, 2), wort: 'übermorgen' };
@@ -543,6 +547,7 @@ async function erlaubt(h, mode, fragen) {
 }
 async function start() {
   $('version').textContent = 'v' + APP_VERSION;
+  $('mRueck').href = '../rueckmeldung/?app=teamkit&version=' + encodeURIComponent(APP_VERSION);
   $('aenderungen').innerHTML = AENDERUNGEN.map(a => `<li><b>${esc(a[0])}</b> (${esc(a[1])}): ${esc(a[2])}</li>`).join('');
   if (EIN) { $('marke').hidden = true; $('btnZurueck').hidden = false; if (PARAM.get('projekt')) $('zurueckText').textContent = 'Zurück zum Projekt ' + PARAM.get('projekt').slice(0, 40); }   // ?projekt= nur noch zur Kompatibilität – Hauptweg ist „oeffnen“
   if (/^https?:$/.test(location.protocol) && location.hostname !== '127.0.0.1' && 'serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -961,6 +966,7 @@ $('mArchiv').onclick = () => { $('aSuche').value = ''; zeige('archiv'); };
 $('mIch').onclick = () => { lokal.set(ICH_KEY, ''); lokal.set('teamkit-name', ''); $('mehr').open = false; ichBanner(); render(); };
 $('mOrdner').onclick = () => { $('mehr').open = false; if ('showDirectoryPicker' in window) archivWaehlen(); else toast('Das geht nur in Edge oder Chrome.'); };
 $('mUeber').onclick = () => zeige('ueber');
+$('mRueck').addEventListener('click', () => { $('mehr').open = false; });
 $('btnNeuLaden').onclick = async () => { await fotosLaden(); await laden(); render(); toast('Aktuell.', 1500); };
 
 /* Alle 60 s und beim Zurückkommen nachsehen – nie, während jemand tippt oder ein Formular offen ist */
