@@ -17,3 +17,11 @@ jobs:
         with:
           node-version: 24
       - run: node tests/regeln.cjs
+      - run: node tests/fokus.cjs
+      - name: BerichtKit daneben holen (SPEKTRON-LOOK byte-gleich prüfen)
+        env:
+          ZWEIG: ${{ github.head_ref }}
+        run: git clone --quiet --depth 1 --branch "$ZWEIG" https://github.com/kaspersebastian83-dot/berichtkit.git ../berichtkit 2>/dev/null || git clone --quiet --depth 1 https://github.com/kaspersebastian83-dot/berichtkit.git ../berichtkit
+      - run: node tests/look.cjs
+        env:
+          TEAMKIT_LOOK_PFLICHT: '1'

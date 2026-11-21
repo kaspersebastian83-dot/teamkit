@@ -61,8 +61,9 @@ const de = d => d.toLocaleDateString('de-DE');
     assert.deepEqual([...T.giltNeu().map(e => e.id)], ['g1'], 'g2 schon gesehen, g3 eigener Beitrag');
   });
 
-  await ok('Rückmeldung: „Fehler oder Wunsch melden“ öffnet die Rückmeldung mit TeamKit und Version', () => {
-    assert.match(html, /<a id="mRueck" href="\.\.\/rueckmeldung\/\?app=teamkit" target="rueckmeldung" rel="noopener">/);
+  await ok('Rückmeldung: „💬 Rückmeldung ↗“ (Tooltip „Fehler oder Wunsch melden“, E8) öffnet die Rückmeldung mit TeamKit und Version; Menü „Mehr …“', () => {
+    assert.match(html, /<a id="mRueck" href="\.\.\/rueckmeldung\/\?app=teamkit" target="rueckmeldung" rel="noopener" title="Fehler oder Wunsch melden">💬 Rückmeldung ↗<\/a>/);
+    assert.match(html, /<details class="mehr" id="mehr"><summary class="sp-knopf mehr-text">Mehr …<\/summary>/);
     assert.match(html, /\$\('mRueck'\)\.href = '\.\.\/rueckmeldung\/\?app=teamkit&version=' \+ encodeURIComponent\(APP_VERSION\)/);
   });
 

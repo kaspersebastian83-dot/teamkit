@@ -94,6 +94,7 @@ svg.i{width:18px;height:18px;flex:none}
 details.mehr{position:relative}
 details.mehr summary{list-style:none}
 details.mehr summary::-webkit-details-marker{display:none}
+details.mehr summary.mehr-text{cursor:pointer;white-space:nowrap}
 details.mehr .menue{position:absolute;right:0;top:48px;background:var(--sp-panel);border:1px solid var(--sp-text);padding:6px 0;display:flex;flex-direction:column;min-width:260px;z-index:6}
 details.mehr .menue button{height:44px;border:0;background:none;text-align:left;padding:0 18px;cursor:pointer;font-size:14px}
 details.mehr .menue a{display:flex;align-items:center;height:44px;padding:0 18px;font-size:14px;color:inherit;text-decoration:none}
@@ -241,14 +242,14 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
   <span class="frei"></span>
   <button class="sp-knopf" id="btnZuTeam" type="button" hidden>Alles anzeigen</button>
   <button class="icon" id="btnNeuLaden" type="button" aria-label="Neu laden" title="Neu laden" hidden><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></button>
-  <details class="mehr" id="mehr"><summary class="icon" aria-label="Mehr"><svg class="i" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></summary>
+  <details class="mehr" id="mehr"><summary class="sp-knopf mehr-text">Mehr …</summary>
     <div class="menue">
       <button type="button" id="mMorgen">Guten-Morgen-Seite zeigen</button>
       <button type="button" id="mArchiv">Archiv: erledigte Neuigkeiten</button>
       <button type="button" id="mIch">Ich bin … ändern</button>
       <button type="button" id="mOrdner">Anderen Archivordner wählen …</button>
       <button type="button" id="mUeber">Über TeamKit</button>
-      <a id="mRueck" href="../rueckmeldung/?app=teamkit" target="rueckmeldung" rel="noopener">Fehler oder Wunsch melden ↗</a>
+      <a id="mRueck" href="../rueckmeldung/?app=teamkit" target="rueckmeldung" rel="noopener" title="Fehler oder Wunsch melden">💬 Rückmeldung ↗</a>
     </div></details>
 </header>
 <main>
@@ -345,8 +346,9 @@ input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin:0}
      g-<JJJJMMTT>-<zufall>.json        „Gilt jetzt“-Beitrag, bleibt bis „erledigt“
      r-<Beitrags-ID>~<Kürzel>.json     Reaktion einer Person (Umfrage, Danke, Antworten)
    Liest: Fotos/<Kürzel>.jpg|png und <Archivordner>/_Spektron-Mitarbeiter.json. Löscht nie Dateien. */
-const APP_VERSION = '0.5.1';
+const APP_VERSION = '0.5.2';
 const AENDERUNGEN = [
+  ['0.5.2', '21.11.2026', 'In der Projektzentrale: Öffnet sich TeamKit auf einem langsamen Rechner erst, wenn man schon wieder in der Projektzentrale ist, bleibt der Tastatur-Fokus dort – Esc und F1 gehen nicht mehr versehentlich an TeamKit. Das Menü oben rechts heißt „Mehr …“ wie in den anderen Spektron-Apps, der Link darin „💬 Rückmeldung ↗“ (Tooltip „Fehler oder Wunsch melden“).'],
   ['0.5.1', '20.11.2026', 'Ein vergangenes Datum ohne Jahr im Text („Fotos vom Sommerfest 12.09.“) hält eine Notiz nicht mehr 60 Tage – sie gilt wie ohne Datum bis heute Abend; ein Datum kurz nach dem Jahreswechsel („09.01.“ im Dezember) zählt weiter. Neu unter „⋯“: „Fehler oder Wunsch melden“ (Rückmeldung mit TeamKit und Version vorgewählt).'],
   ['0.5.0', '17.11.2026', 'Vorbereitet für die Projektzentrale: TeamKit läuft dort unsichtbar im Rahmen, meldet seinen Stand auch ohne Zugriff (bereit/grund), öffnet sich auf Nachricht – auf Wunsch direkt bei einem „Gilt jetzt“-Beitrag – und schließt mit „Zurück“ oder Esc. Unsichtbar geladen gilt nichts als gesehen. Testseite rahmen-test.html.'],
   ['0.4.4', '17.11.2026', 'Öffnet TeamKit direkt die Team-Ansicht, sind nur noch wirklich neue „Gilt jetzt“-Beiträge als „Neu“ markiert (vorher jedes Mal alle von anderen).'],
@@ -927,8 +929,13 @@ document.addEventListener('keydown', ev => {
   if ((S.giltZeigen && !giltFormLeer()) || (antw && antw.value.trim())) return;   // nichts Getipptes verwerfen
   ev.preventDefault(); zurueck();
 });
-/** Fokus nach dem Öffnen: Überschrift des Zugangs, „Los geht’s“ oder das Eingabefeld. */
+/** Fokus nach dem Öffnen: Überschrift des Zugangs, „Los geht’s“ oder das Eingabefeld.
+    Nur, wenn TeamKit den Fokus noch hat (Audit Lauf 5, E6): Die Projektzentrale fokussiert den Rahmen beim Öffnen. Kommt die
+    Nachricht „öffnen“ erst an, wenn man schon wieder in der Projektzentrale ist, bleibt der Fokus dort – sonst gingen Esc und F1
+    an TeamKit statt an die Projektzentrale. */
+const darfFokus = () => typeof document.hasFocus !== 'function' || document.hasFocus();
 function fokusErstes() {
+  if (!darfFokus()) return;
   const el = S.ansicht === 'zugang' ? $('zugangTitel') : S.ansicht === 'morgen' ? document.querySelector('#morgen .los') : S.ansicht === 'team' ? $('kText') : null;
   if (el) el.focus({ preventScroll: true });
 }
@@ -941,7 +948,7 @@ async function oeffnen(d) {
   if (e) {
     S.offen.add(id); teamZeigen();
     const k = document.querySelector(`#tGilt [data-aktion="auf"][data-id="${CSS.escape(id)}"]`);
-    if (k) { k.scrollIntoView({ block: 'center' }); k.focus({ preventScroll: true }); }
+    if (k) { k.scrollIntoView({ block: 'center' }); if (darfFokus()) k.focus({ preventScroll: true }); }
   } else { if (morgenFaellig()) zeige('morgen'); else teamZeigen(); fokusErstes(); }
   melden();
 }

@@ -50,18 +50,22 @@ Die Projektzentrale (gleiche Adresse `kaspersebastian83-dot.github.io`) lädt Te
 | `{ quelle:'projektzentrale', art:'oeffnen', projekt?, id? }` | Rahmen wird sichtbar: TeamKit liest neu und zeigt Guten Morgen (wenn fällig) oder die Team-Ansicht; mit `id` direkt diesen „Gilt jetzt“-Beitrag geöffnet. Ohne Zugriff bleibt der Zugangs-Schirm – der Klick im sichtbaren Rahmen kann dann nach der Erlaubnis fragen. `projekt` setzt „Zurück zum Projekt …“. |
 | `{ quelle:'projektzentrale', art:'zu' }` | die PZ hat den Rahmen selbst ausgeblendet (z. B. Esc in der PZ): offene Antworten/Rückfragen zu, leeres „Gilt jetzt“-Formular zu, Stand melden. |
 
+**Fokus (ab 0.5.2, Audit Lauf 5 E6):** Nach `oeffnen` setzt TeamKit den Fokus (Eingabefeld, „Los geht’s“, Beitrag, Zugangs-Überschrift) nur, wenn sein Dokument ihn hat (`document.hasFocus()` – die PZ fokussiert den Rahmen beim Öffnen). Kommt die Nachricht erst an, wenn man schon wieder in der PZ ist, bleibt der Fokus dort.
+
 Solange TeamKit unsichtbar im Rahmen liegt, gilt nichts als gesehen: `teamkit-morgen` und `teamkit-gilt-gesehen` setzen nur „Los geht’s“, „Zurück“/Esc, „Alles anzeigen“ und „Zurück“ aus Archiv/Über.
 
 **Testseite:** `rahmen-test.html` bettet TeamKit genau so ein, zeigt alle Nachrichten mit Uhrzeit und den Stand („bereit: ja/nein“). `rahmen-test.html?probe=1` lädt TeamKit im Probe-Modus. Die Seite enthält keine Daten und liegt nicht im Offline-Speicher.
 
 ## Rückmeldung
 
-Unter „⋯“ › „Fehler oder Wunsch melden“ öffnet die Rückmeldung-App mit TeamKit und Version vorgewählt (`../rueckmeldung/?app=teamkit&version=…`, ab Rückmeldung 1.5.0).
+Unter „Mehr …“ › „💬 Rückmeldung ↗“ (Tooltip „Fehler oder Wunsch melden“) öffnet die Rückmeldung-App mit TeamKit und Version vorgewählt (`../rueckmeldung/?app=teamkit&version=…`, ab Rückmeldung 1.5.0).
 
 ## Tests
 
 ```sh
 node tests/regeln.cjs   # Datum im Text, Lesefenster der Dateien, „Neu“ bei Gilt jetzt, Rückmeldung-Link – ohne Browser, festes Datum
+node tests/fokus.cjs    # Fokus beim Öffnen aus der Projektzentrale nur, wenn TeamKit ihn hat (E6)
+node tests/look.cjs     # SPEKTRON-LOOK byte-gleich mit BerichtKit (liegt ../berichtkit daneben; TEAMKIT_LOOK_PFLICHT=1 in der CI)
 ```
 
 Läuft in GitHub Actions bei jedem Pull Request und auf `main` (`.github/workflows/tests.yml`).
